@@ -74,6 +74,7 @@ ContextHostResolver::CreateRequest(
     absl::optional<ResolveHostParameters> optional_parameters) {
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
 
+  VLOG(1) << "[breakerspace] ContextHostResolver::CreateRequest()";
   if (shutting_down_)
     return HostResolver::CreateFailingRequest(ERR_CONTEXT_SHUT_DOWN);
 
@@ -81,6 +82,14 @@ ContextHostResolver::CreateRequest(
       std::move(host), std::move(network_isolation_key),
       std::move(source_net_log), std::move(optional_parameters),
       resolve_context_.get(), resolve_context_->host_cache());
+}
+// [breakerspace]
+void ContextHostResolver::SetStrategyInManager(unsigned int packet_strategy) {
+	if (manager_ != nullptr) {
+		manager_->SetStrategy(packet_strategy);
+	} else {
+		VLOG(1) << "[breakerspace] ContextHostResolver::SetStrategyInManager(), manager is null";
+	}
 }
 
 std::unique_ptr<HostResolver::ResolveHostRequest>

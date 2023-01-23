@@ -26,6 +26,7 @@ by a child template that "extends" this file.
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission-sdk-23 android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <!--
       Enable runtime permissions as uses-permission in tip of tree builds
@@ -931,6 +932,11 @@ by a child template that "extends" this file.
             android:name="org.chromium.chrome.browser.browserservices.ui.trustedwebactivity.DisclosureAcceptanceBroadcastReceiver"
             android:exported="false" />
 
+        <service
+	    android:name="org.chromium.chrome.browser.ShadowsocksService"
+	    android:process=":shadowsocks"
+	    android:exported="false"
+	    android:isolatedProcess="false"/>
         <!-- Service for decoding images in a sandboxed process. -->
         <service
             android:description="@string/decoder_description"

@@ -21,6 +21,7 @@ class NET_EXPORT SSLConfigServiceDefaults : public SSLConfigService {
   SSLConfigServiceDefaults& operator=(const SSLConfigServiceDefaults&) = delete;
 
   ~SSLConfigServiceDefaults() override;
+  SSLConfigServiceDefaults(SSLContextConfig default_config);
 
   // Returns the default SSL config settings.
   SSLContextConfig GetSSLContextConfig() override;

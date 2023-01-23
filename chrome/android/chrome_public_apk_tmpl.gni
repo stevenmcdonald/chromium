@@ -241,10 +241,12 @@ template("chrome_public_common_apk_or_module_tmpl") {
         "//components/crash/core/app:chrome_crashpad_handler_named_as_so",
         "//third_party/icu:icu_assets",
       ]
+      deps += [ "//third_party/shadowsocks:shadowsocks_named_as_so" ]
       if (!defined(loadable_modules)) {
         loadable_modules = []
       }
       loadable_modules += [ "$root_out_dir/libchrome_crashpad_handler.so" ]
+      loadable_modules += [ "$root_out_dir/libsslocal.so" ]
       if (!defined(library_always_compress)) {
         library_always_compress = []
       }

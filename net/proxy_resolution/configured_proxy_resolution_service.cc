@@ -1405,6 +1405,20 @@ bool ConfiguredProxyResolutionService::CastToConfiguredProxyResolutionService(
   return true;
 }
 
+std::unique_ptr<ProxyConfigService>
+ConfiguredProxyResolutionService::CreateFixedSystemProxyConfigService(
+    const scoped_refptr<base::SequencedTaskRunner>& main_task_runner, base::StringPiece uri) {
+  ProxyConfig raw_proxy_config;
+  raw_proxy_config.proxy_rules().type = ProxyConfig::ProxyRules::Type::PROXY_LIST;
+  raw_proxy_config.proxy_rules().single_proxies.SetSingleProxyServer(ProxyUriToProxyServer(uri, ProxyServer::SCHEME_SOCKS5));
+#if (!defined(OS_WIN) && !defined(OS_LINUX)) || defined(OS_CHROMEOS)
+  ProxyConfigWithAnnotation proxy_config = ProxyConfigWithAnnotation(raw_proxy_config, NO_TRAFFIC_ANNOTATION_YET);
+#else
+  ProxyConfigWithAnnotation proxy_config = ProxyConfigWithAnnotation(raw_proxy_config, kSystemProxyConfigTrafficAnnotation);
+#endif
+  return std::make_unique<ProxyConfigServiceFixed>(proxy_config);
+}
+
 // static
 std::unique_ptr<ProxyConfigService>
 ConfiguredProxyResolutionService::CreateSystemProxyConfigService(

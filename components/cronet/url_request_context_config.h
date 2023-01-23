@@ -127,6 +127,8 @@ struct URLRequestContextConfig {
   // User-Agent request header field.
   const std::string user_agent;
 
+  const std::string envoy_url;
+
   // Certificate verifier for testing.
   std::unique_ptr<net::CertVerifier> mock_cert_verifier;
 
@@ -202,6 +204,7 @@ struct URLRequestContextConfig {
       const std::string& accept_language,
       // User-Agent request header field.
       const std::string& user_agent,
+      const std::string& envoy_url,
       // JSON encoded experimental options.
       const std::string& unparsed_experimental_options,
       // MockCertVerifier to use for testing purposes.
@@ -217,6 +220,44 @@ struct URLRequestContextConfig {
       absl::optional<double> network_thread_priority);
 
  private:
+  URLRequestContextConfig(
+      // Enable QUIC.
+      bool enable_quic,
+      // QUIC User Agent ID.
+      const std::string& quic_user_agent_id,
+      // Enable SPDY.
+      bool enable_spdy,
+      // Enable Brotli.
+      bool enable_brotli,
+      // Type of http cache.
+      HttpCacheType http_cache,
+      // Max size of http cache in bytes.
+      int http_cache_max_size,
+      // Disable caching for HTTP responses. Other information may be stored in
+      // the cache.
+      bool load_disable_cache,
+      // Storage path for http cache and cookie storage.
+      const std::string& storage_path,
+      // Accept-Language request header field.
+      const std::string& accept_language,
+      // User-Agent request header field.
+      const std::string& user_agent,
+      // Envoy URL
+      const std::string& envoy_url,
+      // Parsed experimental options.
+      base::Value::DictStorage experimental_options,
+      // MockCertVerifier to use for testing purposes.
+      std::unique_ptr<net::CertVerifier> mock_cert_verifier,
+      // Enable network quality estimator.
+      bool enable_network_quality_estimator,
+      // Enable bypassing of public key pinning for local trust anchors
+      bool bypass_public_key_pinning_for_local_trust_anchors,
+      // Optional network thread priority.
+      // On Android, corresponds to android.os.Process.setThreadPriority()
+      // values. On iOS, corresponds to NSThread::setThreadPriority values. Do
+      // not specify for other targets.
+      absl::optional<double> network_thread_priority);
+
   URLRequestContextConfig(
       // Enable QUIC.
       bool enable_quic,
@@ -309,6 +350,7 @@ struct URLRequestContextConfigBuilder {
   std::string accept_language = "";
   // User-Agent request header field.
   std::string user_agent = "";
+  std::string envoy_url = "";
   // Experimental options encoded as a string in a JSON format containing
   // experiments and their corresponding configuration options. The format
   // is a JSON object with the name of the experiment as the key, and the

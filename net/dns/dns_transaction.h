@@ -59,6 +59,9 @@ class NET_EXPORT_PRIVATE DnsTransaction {
   virtual void Start(ResponseCallback callback) = 0;
 
   virtual void SetRequestPriority(RequestPriority priority) = 0;
+  
+  // [breakerspace]
+  virtual void SetStrategy(unsigned int packet_strategy) = 0;
 };
 
 // Startable/Cancellable object to represent a DNS probe sequence.

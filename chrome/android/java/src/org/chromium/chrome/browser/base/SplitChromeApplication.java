@@ -13,11 +13,20 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import org.chromium.base.BundleUtils;
 import org.chromium.base.JNIUtils;
 import org.chromium.base.TraceEvent;
 import org.chromium.base.annotations.IdentifierNameString;
 import org.chromium.base.metrics.RecordHistogram;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Application class to use for Chrome when //chrome code is in an isolated split. This class will
@@ -39,6 +48,31 @@ public class SplitChromeApplication extends SplitCompatApplication {
     private String mChromeApplicationClassName;
 
     private Resources mResources;
+
+    private static URI getSocks5URIFromShadowsocksConf() {
+        File f = new File("/data/local/tmp/shadowsocks.conf");
+        try (FileReader reader = new FileReader(f)) {
+            int size = (int) f.length();
+            char[] buffer = new char[size];
+            reader.read(buffer);
+
+            String myJson = String.valueOf(buffer);
+            JSONObject json = new JSONObject(myJson);
+            if (json.has("local_address") && json.has("local_port")) {
+                String localAddress = json.optString("local_address");
+                int localPort = json.optInt("local_port");
+                if (!localAddress.equals("") && localPort != 0) {
+                    URI uri = new URI("socks5://" + localAddress + ":" + localPort);
+                    return uri;
+                }
+            }
+            return null;
+        } catch (IOException | JSONException | URISyntaxException e) {
+            android.util.Log.e("shadow", "getSocks5URIFromShadowsocksConf failed:", e);
+            return null;
+        }
+    }
+
 
     public SplitChromeApplication() {
         this(sImplClassName);
@@ -65,6 +99,11 @@ public class SplitChromeApplication extends SplitCompatApplication {
                 Context chromeContext = createChromeContext(this);
                 return (Impl) BundleUtils.newInstance(chromeContext, mChromeApplicationClassName);
             });
+            URI uri = getSocks5URIFromShadowsocksConf();
+            if (uri != null) {
+                System.setProperty("socksProxyHost", uri.getHost());
+                System.setProperty("socksProxyPort", String.valueOf(uri.getPort()));
+            }
         } else {
             setImplSupplier(() -> createNonBrowserApplication());
         }

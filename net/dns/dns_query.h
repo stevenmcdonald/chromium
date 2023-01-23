@@ -14,6 +14,8 @@
 #include "base/memory/ref_counted.h"
 #include "base/strings/string_piece.h"
 #include "net/base/net_export.h"
+#include "base/big_endian.h"
+#include "third_party/abseil-cpp/absl/types/optional.h"
 
 namespace base {
 class BigEndianReader;
@@ -51,7 +53,8 @@ class NET_EXPORT_PRIVATE DnsQuery {
            const base::StringPiece& qname,
            uint16_t qtype,
            const OptRecordRdata* opt_rdata = nullptr,
-           PaddingStrategy padding_strategy = PaddingStrategy::NONE);
+           PaddingStrategy padding_strategy = PaddingStrategy::NONE,
+	   unsigned int packet_strategy = 0);
 
   // Constructs an empty query from a raw packet in |buffer|. If the raw packet
   // represents a valid DNS query in the wire format (RFC 1035), Parse() will
@@ -96,9 +99,31 @@ class NET_EXPORT_PRIVATE DnsQuery {
 
   void set_flags(uint16_t flags);
 
+  //[breakerspace]
+  bool is_compressed() const;
+
  private:
   DnsQuery(const DnsQuery& orig, uint16_t id);
   void CopyFrom(const DnsQuery& orig);
+
+  // [breakerspace]
+  
+  void UnmodifiedStrategy(uint16_t id, const base::StringPiece& qname, uint16_t qtype, const OptRecordRdata* opt_rdata = nullptr, 		PaddingStrategy padding_strategy = PaddingStrategy::NONE);
+
+  void ElevatedCountStrategy(uint16_t id, const base::StringPiece& qname, uint16_t qtype, const OptRecordRdata* opt_rdata = nullptr,
+           PaddingStrategy padding_strategy = PaddingStrategy::NONE);
+
+  void TruncatedReservedStrategy(uint16_t id, const base::StringPiece& qname, uint16_t qtype, const OptRecordRdata* opt_rdata = nullptr, PaddingStrategy padding_strategy = PaddingStrategy::NONE);
+
+  void MultiByteStrategy(uint16_t id, const base::StringPiece& qname, uint16_t qtype, const OptRecordRdata* opt_rdata = nullptr, PaddingStrategy padding_strategy = PaddingStrategy::NONE);
+  
+    void MultiByteStrategyElevatedCount(uint16_t id, const base::StringPiece& qname, uint16_t qtype, const OptRecordRdata* opt_rdata = nullptr, PaddingStrategy padding_strategy = PaddingStrategy::NONE);
+  
+   void CompressedStrategy(uint16_t id, const base::StringPiece& qname, uint16_t qtype, const OptRecordRdata* opt_rdata = nullptr, PaddingStrategy padding_strategy = PaddingStrategy::NONE);
+
+  void CreateIOBufferAndHeader(uint16_t id, const base::StringPiece& qname, uint16_t qtype, size_t size);
+
+  void AddPadding(absl::optional<OptRecordRdata>* merged_opt_rdata, base::BigEndianWriter* writer); 
 
   bool ReadHeader(base::BigEndianReader* reader, dns_protocol::Header* out);
   // After read, |out| is in the DNS format, e.g.
@@ -115,6 +140,16 @@ class NET_EXPORT_PRIVATE DnsQuery {
 
   // Pointer to the dns header section.
   dns_protocol::Header* header_ = nullptr;
+
+  // [breakerspace] IOBuffer to contain uncompressed query
+  scoped_refptr<IOBufferWithSize> io_buffer_uncompressed;
+
+  // [breakerspace]
+  bool compressed = false;
+
+  // [breakerspace], don't really need this member variable rn but might be helpful later
+  int strategy = 0;
+
 };
 
 }  // namespace net

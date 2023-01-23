@@ -72,6 +72,11 @@ std::unique_ptr<net::ProxyConfigService> CreateProxyConfigService(
   return nullptr;
 }
 
+std::unique_ptr<net::ProxyConfigService> CreateFixedProxyConfigService(
+    const scoped_refptr<base::SequencedTaskRunner>& io_task_runner, base::StringPiece uri) {
+  return nullptr;
+}
+
 std::unique_ptr<net::ProxyResolutionService> CreateProxyResolutionService(
     std::unique_ptr<net::ProxyConfigService> proxy_config_service,
     net::NetLog* net_log) {

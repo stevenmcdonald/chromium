@@ -101,6 +101,11 @@ std::unique_ptr<URLRequest> URLRequestContext::CreateRequest(
 }
 #endif
 
+// [breakerspace]
+void URLRequestContext::SetStrategy(unsigned int packet_strategy) {
+	strategy = packet_strategy;
+}
+
 std::unique_ptr<URLRequest> URLRequestContext::CreateRequest(
     const GURL& url,
     RequestPriority priority,
@@ -108,6 +113,11 @@ std::unique_ptr<URLRequest> URLRequestContext::CreateRequest(
     NetworkTrafficAnnotationTag traffic_annotation,
     bool is_for_websockets,
     const absl::optional<net::NetLogSource> net_log_source) const {
+  VLOG(1) << "[breakerspace] URLRequestContext::CreateRequest()";
+  
+  // [breakerspace]	
+  host_resolver()->SetStrategyInManager(strategy);
+ 
   return base::WrapUnique(new URLRequest(url, priority, delegate, this,
                                          traffic_annotation, is_for_websockets,
                                          net_log_source));

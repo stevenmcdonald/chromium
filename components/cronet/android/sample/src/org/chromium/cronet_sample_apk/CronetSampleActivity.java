@@ -125,6 +125,8 @@ public class CronetSampleActivity extends Activity {
         CronetEngine.Builder myBuilder = new CronetEngine.Builder(this);
         myBuilder.enableHttpCache(CronetEngine.Builder.HTTP_CACHE_IN_MEMORY, 100 * 1024)
                 .enableHttp2(true)
+                //.setEnvoyUrl("https://example.com/enovy_path/")
+                .setEnvoyUrl("socks5://127.0.0.1:1080")
                 .enableQuic(true);
 
         mCronetEngine = myBuilder.build();

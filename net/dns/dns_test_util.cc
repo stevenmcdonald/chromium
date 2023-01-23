@@ -494,6 +494,8 @@ class MockDnsTransactionFactory::MockTransaction
 
   uint16_t GetType() const override { return qtype_; }
 
+  void SetStrategy(unsigned int packet_strategy){}
+
   void Start(ResponseCallback callback) override {
     CHECK(!callback.is_null());
     CHECK(callback_.is_null());

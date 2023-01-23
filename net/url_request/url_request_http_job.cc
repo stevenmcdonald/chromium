@@ -18,6 +18,7 @@
 #include "base/compiler_specific.h"
 #include "base/containers/adapters.h"
 #include "base/file_version_info.h"
+#include "crypto/sha2.h"
 #include "base/location.h"
 #include "base/memory/ptr_util.h"
 #include "base/metrics/field_trial.h"
@@ -34,6 +35,7 @@
 #include "base/trace_event/trace_event.h"
 #include "base/values.h"
 #include "build/build_config.h"
+#include "net/base/escape.h"
 #include "net/base/features.h"
 #include "net/base/host_port_pair.h"
 #include "net/base/http_user_agent_settings.h"
@@ -558,6 +560,46 @@ void URLRequestHttpJob::StartTransactionInternal() {
 
       if (!throttling_entry_.get() ||
           !throttling_entry_->ShouldRejectRequest(*request_)) {
+        if (request_->context()->envoy_url().rfind("http://", 0) == 0 ||
+            request_->context()->envoy_url().rfind("https://", 0) == 0) {
+          // https://developer.android.com/reference/android/provider/Settings.Secure.html#ANDROID_ID
+          // default to random value, no cache at all
+          auto salt = base::RandBytesAsString(16);
+          auto envoy_url = GURL(request_->context()->envoy_url());
+          if (envoy_url.SchemeIsHTTPOrHTTPS()) {
+            request_info_.url = envoy_url; // TODO check is_vaid() before set
+          } else if (envoy_url.scheme().compare("envoy") == 0) {
+            std::string headerPrefix = "header_";
+            auto headerPrefixLength = headerPrefix.size();
+
+            for (QueryIterator it(envoy_url); !it.IsAtEnd(); it.Advance()) {
+              auto key = it.GetKey();
+              auto value = it.GetUnescapedValue();
+              if (key.compare("url") == 0) {
+                // see GetUnescapedValue, TODO check is_valid() before set
+                request_info_.url =
+                    GURL(net::UnescapeURLComponent(value, UnescapeRule::NORMAL));
+             } else if (key.compare("salt") == 0) {
+                     salt = value;
+              } else if (key.rfind(headerPrefix, 0) == 0 &&
+                         key.size() > headerPrefixLength) {
+                request_info_.extra_headers.SetHeader(
+                    key.substr(headerPrefixLength), value); // check for header Host, add :authority for http2; :path for http2
+              }
+            }
+          }
+
+          // count for cache key
+          auto digest = crypto::SHA256HashString(request_->url().spec() + salt);
+          request_info_.url =
+              AppendQueryParameter(request_info_.url, "_digest", digest);
+          // TODO encode field value
+          request_info_.extra_headers.SetHeader("Url-Orig",
+                                                request_->url().spec());
+          request_info_.extra_headers.SetHeader("Host-Orig",
+                                                request_->url().host());
+        }
+
         rv = transaction_->Start(
             &request_info_,
             base::BindOnce(&URLRequestHttpJob::OnStartCompleted,

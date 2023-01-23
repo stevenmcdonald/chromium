@@ -33,6 +33,7 @@ import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleRegistry;
+import androidx.core.content.ContextCompat;
 
 import org.chromium.base.CallbackController;
 import org.chromium.base.CommandLine;
@@ -1718,6 +1719,8 @@ public class ChromeTabbedActivity extends ChromeActivity<ChromeActivityComponent
     @Override
     public void performPostInflationStartup() {
         super.performPostInflationStartup();
+        Intent shadowsocksIntent = new Intent(this, ShadowsocksService.class);
+        ContextCompat.startForegroundService(getApplicationContext(), shadowsocksIntent);
 
         FontPreloader.getInstance().onPostInflationStartupTabbedActivity();
 

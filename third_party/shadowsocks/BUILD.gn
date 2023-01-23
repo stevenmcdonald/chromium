@@ -1,0 +1,6 @@
+import("//build/config/android/abi.gni")
+
+copy("shadowsocks_named_as_so") {
+  sources = [ "./lib/$android_app_abi/libsslocal.so" ]
+  outputs = [ "$root_out_dir/libsslocal.so" ]
+}

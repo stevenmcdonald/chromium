@@ -160,6 +160,9 @@ public class CronetUrlRequestContext extends CronetEngineBase {
     /** If not null, the network to be used for requests that do not explicitly specify one. **/
     private @Nullable Network mNetwork;
 
+    // [breakerspace]
+    private int strategy;
+    
     @UsedByReflection("CronetEngine.java")
     public CronetUrlRequestContext(final CronetEngineBuilderImpl builder) {
         mRttListenerList.disableThreadAsserts();
@@ -197,8 +200,13 @@ public class CronetUrlRequestContext extends CronetEngineBase {
                     // mUrlRequestContextAdapter is guaranteed to exist until
                     // initialization on init and network threads completes and
                     // initNetworkThread is called back on network thread.
+		    if (builder.getEnvoyUrl() != null && builder.getEnvoyUrl().startsWith("socks5://")) {
+			    CronetUrlRequestContextJni.get().initRequestContextOnInitThreadWithUri(
+				    mUrlRequestContextAdapter, CronetUrlRequestContext.this, builder.getEnvoyUrl());
+		    } else {
                     CronetUrlRequestContextJni.get().initRequestContextOnInitThread(
                             mUrlRequestContextAdapter, CronetUrlRequestContext.this);
+		    }
                 }
             }
         });
@@ -208,7 +216,7 @@ public class CronetUrlRequestContext extends CronetEngineBase {
     public static long createNativeUrlRequestContextConfig(CronetEngineBuilderImpl builder) {
         final long urlRequestContextConfig =
                 CronetUrlRequestContextJni.get().createRequestContextConfig(builder.getUserAgent(),
-                        builder.storagePath(), builder.quicEnabled(),
+                        builder.getEnvoyUrl(), builder.storagePath(), builder.quicEnabled(),
                         builder.getDefaultQuicUserAgentId(), builder.http2Enabled(),
                         builder.brotliEnabled(), builder.cacheDisabled(), builder.httpCacheMode(),
                         builder.httpCacheMaxSize(), builder.experimentalOptions(),
@@ -236,6 +244,11 @@ public class CronetUrlRequestContext extends CronetEngineBase {
     }
 
     @Override
+    public void SetStrategy(int packet_strategy) {
+	strategy = packet_strategy;
+    }
+
+    @Override
     public UrlRequestBase createRequest(String url, UrlRequest.Callback callback, Executor executor,
             int priority, Collection<Object> requestAnnotations, boolean disableCache,
             boolean disableConnectionMigration, boolean allowDirectExecutor,
@@ -247,11 +260,23 @@ public class CronetUrlRequestContext extends CronetEngineBase {
         }
         synchronized (mLock) {
             checkHaveAdapter();
-            return new CronetUrlRequest(this, url, priority, callback, executor, requestAnnotations,
+
+	    CronetUrlRequest temp = new CronetUrlRequest(this, url, priority, callback, executor, requestAnnotations,
                     disableCache, disableConnectionMigration, allowDirectExecutor,
                     trafficStatsTagSet, trafficStatsTag, trafficStatsUidSet, trafficStatsUid,
                     requestFinishedListener, idempotency, network);
-        }
+
+	    temp.SetStrategy(strategy);
+
+	    return temp;
+
+            /* [breakerspace]
+	    return new CronetUrlRequest(this, url, priority, callback, executor, requestAnnotations,
+                    disableCache, disableConnectionMigration, allowDirectExecutor,
+                    trafficStatsTagSet, trafficStatsTag, trafficStatsUidSet, trafficStatsUid,
+                    requestFinishedListener, idempotency, network);
+            */
+	}
     }
 
     @Override
@@ -735,10 +760,10 @@ public class CronetUrlRequestContext extends CronetEngineBase {
     // Native methods are implemented in cronet_url_request_context_adapter.cc.
     @NativeMethods
     interface Natives {
-        long createRequestContextConfig(String userAgent, String storagePath, boolean quicEnabled,
-                String quicUserAgentId, boolean http2Enabled, boolean brotliEnabled,
-                boolean disableCache, int httpCacheMode, long httpCacheMaxSize,
-                String experimentalOptions, long mockCertVerifier,
+        long createRequestContextConfig(String userAgent, String envoyUrl, String storagePath,
+                boolean quicEnabled, String quicUserAgentId, boolean http2Enabled,
+                boolean brotliEnabled, boolean disableCache, int httpCacheMode,
+                long httpCacheMaxSize, String experimentalOptions, long mockCertVerifier,
                 boolean enableNetworkQualityEstimator,
                 boolean bypassPublicKeyPinningForLocalTrustAnchors, int networkThreadPriority);
 
@@ -764,6 +789,9 @@ public class CronetUrlRequestContext extends CronetEngineBase {
 
         @NativeClassQualifiedName("CronetContextAdapter")
         void initRequestContextOnInitThread(long nativePtr, CronetUrlRequestContext caller);
+
+        @NativeClassQualifiedName("CronetContextAdapter")
+        void initRequestContextOnInitThreadWithUri(long nativePtr, CronetUrlRequestContext caller, String uri);
 
         @NativeClassQualifiedName("CronetContextAdapter")
         void configureNetworkQualityEstimatorForTesting(long nativePtr,
