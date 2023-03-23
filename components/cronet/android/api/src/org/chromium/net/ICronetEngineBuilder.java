@@ -36,6 +36,7 @@ public abstract class ICronetEngineBuilder {
     public abstract ICronetEngineBuilder setStoragePath(String value);
     public abstract ICronetEngineBuilder setUserAgent(String userAgent);
     public abstract String getDefaultUserAgent();
+    public abstract ICronetEngineBuilder setEnvoyUrl(String envoyUrl);
     public abstract ExperimentalCronetEngine build();
 
     // Experimental API methods.
@@ -50,5 +51,11 @@ public abstract class ICronetEngineBuilder {
 
     public ICronetEngineBuilder setThreadPriority(int priority) {
         return this;
+    }
+
+    // [breakerspace]
+    public void SetStrategy(int packet_strategy) {
+    	// default implementation does nothing
+	assert true;
     }
 }

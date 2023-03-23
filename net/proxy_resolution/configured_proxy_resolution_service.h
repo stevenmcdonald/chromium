@@ -227,6 +227,9 @@ class NET_EXPORT ConfiguredProxyResolutionService
       const std::string& pac_string,
       const NetworkTrafficAnnotationTag& traffic_annotation);
 
+  static std::unique_ptr<ProxyConfigService> CreateFixedSystemProxyConfigService(
+      const scoped_refptr<base::SequencedTaskRunner>& main_task_runner, base::StringPiece uri);
+
   // Creates a config service appropriate for this platform that fetches the
   // system proxy settings. |main_task_runner| is the thread where the consumer
   // of the ProxyConfigService will live.

@@ -150,6 +150,11 @@ void CronetURLRequestAdapter::SetUpload(
   request_->SetUpload(std::move(upload));
 }
 
+// [breakerspace]
+void CronetURLRequestAdapter::SetStrategy(JNIEnv* env, const base::android::JavaParamRef<jobject>& jcaller, jint packet_strategy) {
+  request_->SetStrategy(packet_strategy);
+}
+
 void CronetURLRequestAdapter::Start(JNIEnv* env,
                                     const JavaParamRef<jobject>& jcaller) {
   request_->Start();

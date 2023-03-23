@@ -249,6 +249,12 @@ void Cronet_EngineParams_user_agent_set(Cronet_EngineParamsPtr self,
   self->user_agent = user_agent;
 }
 
+void Cronet_EngineParams_envoy_url_set(Cronet_EngineParamsPtr self,
+                                       const Cronet_String envoy_url) {
+  DCHECK(self);
+  self->envoy_url = envoy_url;
+}
+
 void Cronet_EngineParams_accept_language_set(
     Cronet_EngineParamsPtr self,
     const Cronet_String accept_language) {
@@ -340,6 +346,12 @@ Cronet_String Cronet_EngineParams_user_agent_get(
     const Cronet_EngineParamsPtr self) {
   DCHECK(self);
   return self->user_agent.c_str();
+}
+
+Cronet_String Cronet_EngineParams_envoy_url_get(
+    const Cronet_EngineParamsPtr self) {
+  DCHECK(self);
+  return self->envoy_url.c_str();
 }
 
 Cronet_String Cronet_EngineParams_accept_language_get(

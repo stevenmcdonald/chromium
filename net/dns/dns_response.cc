@@ -277,6 +277,7 @@ DnsResponse::DnsResponse(
     uint8_t rcode,
     bool validate_records) {
   bool has_query = query.has_value();
+  VLOG(1) << "[breakerspace] DnsResponse::DnsResponse(lots of params)";
   dns_protocol::Header header;
   header.id = id;
   bool success = true;
@@ -353,14 +354,14 @@ DnsResponse::DnsResponse(
 
 DnsResponse::DnsResponse()
     : io_buffer_(base::MakeRefCounted<IOBuffer>(dns_protocol::kMaxUDPSize + 1)),
-      io_buffer_size_(dns_protocol::kMaxUDPSize + 1) {}
+      io_buffer_size_(dns_protocol::kMaxUDPSize + 1) {VLOG(1) << "[breakerspace] DnsResponse::DnsResponse()";}
 
 DnsResponse::DnsResponse(scoped_refptr<IOBuffer> buffer, size_t size)
-    : io_buffer_(std::move(buffer)), io_buffer_size_(size) {}
+    : io_buffer_(std::move(buffer)), io_buffer_size_(size) {VLOG(1) << "[breakerspace] DnsResponse::DnsResponse(buffer, size)";}
 
 DnsResponse::DnsResponse(size_t length)
     : io_buffer_(base::MakeRefCounted<IOBuffer>(length)),
-      io_buffer_size_(length) {}
+      io_buffer_size_(length) {VLOG(1) << "[breakerspace] DnsResponse::DnsResponse(size)";}
 
 DnsResponse::DnsResponse(const void* data, size_t length, size_t answer_offset)
     : io_buffer_(base::MakeRefCounted<IOBufferWithSize>(length)),
@@ -369,6 +370,7 @@ DnsResponse::DnsResponse(const void* data, size_t length, size_t answer_offset)
               length,
               answer_offset,
               std::numeric_limits<size_t>::max()) {
+  VLOG(1) << "[breakerspace] DnsResponse::DnsResponse(data, length, offset)";
   DCHECK(data);
   memcpy(io_buffer_->data(), data, length);
 }
@@ -391,10 +393,11 @@ DnsResponse::~DnsResponse() = default;
 
 bool DnsResponse::InitParse(size_t nbytes, const DnsQuery& query) {
   const base::StringPiece question = query.question();
-
+  VLOG(1) << "[breakerspace] DnsResponse::InitParse(), question = " << question;
   // Response includes question, it should be at least that size.
   if (nbytes < kHeaderSize + question.size() || nbytes > io_buffer_size_) {
-    return false;
+     VLOG(1) << "[breakerspace] DnsResponse::InitParse() response not at least question size";
+     return false;
   }
 
   // At this point, it has been validated that the response is at least large
@@ -411,18 +414,61 @@ bool DnsResponse::InitParse(size_t nbytes, const DnsQuery& query) {
     return false;
 
   // Match question count.
+  /* disabled by [breakerspace]
   if (base::NetToHost16(header()->qdcount) != 1)
     return false;
+  */
+
+ VLOG(1) << "[breakerspace] qdcount " << base::NetToHost16(header()->qdcount);
+ //[breakerspace]
+ if (query.is_compressed() && base::NetToHost16(header()->qdcount) == 2) {
+	 VLOG(1) << "[breakerspace] substitution runs";
+ 	
+	scoped_refptr<IOBuffer> io_buffer_substitute;
+ 	// [breakerspace] The second question record contains a pointer to the first + an index number + 4 octets for
+	// the qtype and qclass. We get rid of that, and reduce the size by 6.
+ 	io_buffer_substitute =  base::MakeRefCounted<IOBufferWithSize>(io_buffer_size() - 6);
+ 	VLOG(1) << "[breakerspace] DnsResponse::InitParse(), question.size() = " << question.size();
+ 
+ 	base::BigEndianWriter substitute_writer(io_buffer_substitute->data(),
+                               io_buffer_size());
+	
+	//first question record always starts at index 12
+ 	substitute_writer.WriteBytes(io_buffer_->data(), 12);
+ 	substitute_writer.WriteBytes(&(io_buffer_->data()[12]), question.size());
+ 	substitute_writer.WriteBytes(&(io_buffer_->data()[12 + question.size() + 6]), io_buffer_size() - (12 + question.size() + 6) + 1);
+ 	dns_protocol::Header* header_;
+ 	header_ = reinterpret_cast<dns_protocol::Header*>(io_buffer_substitute->data());
+ 	header_->qdcount = base::HostToNet16(1);
+
+	
+	io_buffer_ = io_buffer_substitute;
+	
+ }
+
 
   // Match the question section.
   if (question !=
       base::StringPiece(io_buffer_->data() + kHeaderSize, question.size())) {
+    VLOG(1) << "[breakerspace] DnsResponse::InitParse(), Question section not matched";
     return false;
   }
-
+  
+  VLOG(1) << "[breakerspace] DnsResponse::InitParse(), query.qname() " << query.qname();
+  VLOG(1) << "[breakerspace] DnsResponse::InitParse(), query.qname()[0]" << (int)(query.qname()[0]);
+  VLOG(1) << "[breakerspace] DnsResponse::InitParse(), query.qname()[4]" << (int)(query.qname()[4]);
   absl::optional<std::string> dotted_qname = DnsDomainToString(query.qname());
+
+
+
+  if (!dotted_qname.has_value())
+    VLOG(1) << "[breakerspace] DnsResponse::InitParse() dotted qname no value"; 
   if (!dotted_qname.has_value())
     return false;
+
+  VLOG(1) << "[breakerspace] DnsResponse::InitParse() dotted qname has value";
+
+
   dotted_qnames_.push_back(std::move(dotted_qname).value());
   qtypes_.push_back(query.qtype());
 
@@ -495,6 +541,7 @@ uint8_t DnsResponse::rcode() const {
 
 unsigned DnsResponse::question_count() const {
   DCHECK(parser_.IsValid());
+  
   return base::NetToHost16(header()->qdcount);
 }
 

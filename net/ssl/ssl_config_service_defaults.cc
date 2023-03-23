@@ -9,6 +9,10 @@ namespace net {
 SSLConfigServiceDefaults::SSLConfigServiceDefaults() = default;
 SSLConfigServiceDefaults::~SSLConfigServiceDefaults() = default;
 
+SSLConfigServiceDefaults::SSLConfigServiceDefaults(SSLContextConfig default_config): default_config_(default_config) {
+  // default_config.disabled_cipher_suites = default_config_.disabled_cipher_suites;
+}
+
 SSLContextConfig SSLConfigServiceDefaults::GetSSLContextConfig() {
   return default_config_;
 }

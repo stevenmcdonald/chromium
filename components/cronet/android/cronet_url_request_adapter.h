@@ -79,6 +79,9 @@ class CronetURLRequestAdapter : public CronetURLRequest::Callback {
   // Adds a request body to the request before it starts.
   void SetUpload(std::unique_ptr<net::UploadDataStream> upload);
 
+  //[breakerspace]
+  void SetStrategy(JNIEnv* env, const base::android::JavaParamRef<jobject>& jcaller, jint packet_strategy);
+  
   // Starts the request.
   void Start(JNIEnv* env, const base::android::JavaParamRef<jobject>& jcaller);
 

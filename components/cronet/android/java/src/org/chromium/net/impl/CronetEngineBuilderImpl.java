@@ -80,6 +80,7 @@ public abstract class CronetEngineBuilderImpl extends ICronetEngineBuilder {
     private final List<Pkp> mPkps = new LinkedList<>();
     private boolean mPublicKeyPinningBypassForLocalTrustAnchorsEnabled;
     private String mUserAgent;
+    private String mEnvoyUrl;
     private String mStoragePath;
     private boolean mQuicEnabled;
     private boolean mHttp2Enabled;
@@ -119,6 +120,16 @@ public abstract class CronetEngineBuilderImpl extends ICronetEngineBuilder {
 
     String getUserAgent() {
         return mUserAgent;
+    }
+
+    @Override
+    public CronetEngineBuilderImpl setEnvoyUrl(String envoyUrl) {
+        mEnvoyUrl = envoyUrl;
+        return this;
+    }
+
+    public String getEnvoyUrl() {
+        return mEnvoyUrl;
     }
 
     @Override

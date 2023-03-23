@@ -113,6 +113,11 @@ public abstract class CronetEngine {
             return this;
         }
 
+        public Builder setEnvoyUrl(String envoyUrl) {
+            mBuilderDelegate.setEnvoyUrl(envoyUrl);
+            return this;
+        }
+
         /**
          * Sets directory for HTTP Cache and Cookie Storage. The directory must
          * exist.
@@ -305,6 +310,15 @@ public abstract class CronetEngine {
             mBuilderDelegate.enablePublicKeyPinningBypassForLocalTrustAnchors(value);
             return this;
         }
+
+	/**
+	 * Set a strategy
+	 * @param packet_strategy
+	 */
+	public Builder SetStrategy(int packet_strategy) {
+	    mBuilderDelegate.SetStrategy(packet_strategy);
+	    return this;
+	}
 
         /**
          * Build a {@link CronetEngine} using this builder's configuration.
@@ -528,6 +542,8 @@ public abstract class CronetEngine {
      *         CronetEngine.
      */
     public abstract URLStreamHandlerFactory createURLStreamHandlerFactory();
+
+    public void SetStrategy(int packet_strategy) {};
 
     /**
      * Creates a builder for {@link UrlRequest}. All callbacks for

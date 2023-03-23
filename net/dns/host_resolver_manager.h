@@ -153,6 +153,10 @@ class NET_EXPORT HostResolverManager
       absl::optional<ResolveHostParameters> optional_parameters,
       ResolveContext* resolve_context,
       HostCache* host_cache);
+
+  // [breakerspace]
+  void SetStrategy(unsigned int packet_strategy);
+  
   // |resolve_context| is the context to use for the probes, and it is expected
   // to be the context of the calling ContextHostResolver.
   std::unique_ptr<HostResolver::ProbeRequest> CreateDohProbeRequest(
@@ -544,6 +548,9 @@ class NET_EXPORT HostResolverManager
       registered_contexts_;
   bool invalidation_in_progress_;
 
+  // [breakerspace]
+  unsigned int strategy = 0;
+ 
   // Helper for metrics associated with `features::kDnsHttpssvc`.
   HttpssvcExperimentDomainCache httpssvc_domain_cache_;
 

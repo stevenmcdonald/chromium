@@ -220,6 +220,7 @@ class DnsUDPAttempt : public DnsAttempt {
     start_time_ = base::TimeTicks::Now();
     next_state_ = STATE_SEND_QUERY;
 
+    VLOG(1) << "[breakerspace] DnsUDPAttempt::Start()";
     int rv = socket_->Connect(server_);
     if (rv != OK) {
       DVLOG(1) << "Failed to connect socket: " << rv;
@@ -234,7 +235,7 @@ class DnsUDPAttempt : public DnsAttempt {
     return DoLoop(OK);
   }
 
-  const DnsQuery* GetQuery() const override { return query_.get(); }
+  const DnsQuery* GetQuery() const override { VLOG(1) << "[breakerspace] DnsUDPAttempt::GetQuery()"; return query_.get(); }
 
   const DnsResponse* GetResponse() const override {
     const DnsResponse* resp = response_.get();
@@ -297,6 +298,7 @@ class DnsUDPAttempt : public DnsAttempt {
 
   int DoSendQuery() {
     next_state_ = STATE_SEND_QUERY_COMPLETE;
+    VLOG(1) << "[breakerspace] DnsUDPAttempt::DoSendQuery()";
     return socket_->Write(
         query_->io_buffer(), query_->io_buffer()->size(),
         base::BindOnce(&DnsUDPAttempt::OnIOComplete, base::Unretained(this)),
@@ -305,6 +307,7 @@ class DnsUDPAttempt : public DnsAttempt {
 
   int DoSendQueryComplete(int rv) {
     DCHECK_NE(ERR_IO_PENDING, rv);
+    VLOG(1) << "[breakerspace] DnsUDPAttempt::DoSendQueryComplete()";
     if (rv < 0)
       return rv;
 
@@ -317,6 +320,7 @@ class DnsUDPAttempt : public DnsAttempt {
   }
 
   int DoReadResponse() {
+    VLOG(1) << "[breakerspace] DnsUDPAttempt::DoReadResponse()";
     next_state_ = STATE_READ_RESPONSE_COMPLETE;
     response_ = std::make_unique<DnsResponse>();
     return socket_->Read(
@@ -325,7 +329,9 @@ class DnsUDPAttempt : public DnsAttempt {
   }
 
   int DoReadResponseComplete(int rv) {
+    VLOG(1) << "[breakerspace] DnsUDPAttempt::DoReadResponseComplete() before DCHECK_NE, rv = " << rv << ", ERR_IO_PENDING = " << ERR_IO_PENDING;
     DCHECK_NE(ERR_IO_PENDING, rv);
+    VLOG(1) << "[breakerspace] DnsUDPAttempt::DoReadResponseComplete(), rv = " << rv;
     if (rv < 0)
       return rv;
 
@@ -347,6 +353,7 @@ class DnsUDPAttempt : public DnsAttempt {
   }
 
   void OnIOComplete(int rv) {
+    VLOG(1) << "[breakerspace] DnsUDPAttempt::OnIOComplete()";
     rv = DoLoop(rv);
     if (rv != ERR_IO_PENDING)
       std::move(callback_).Run(rv);
@@ -1127,7 +1134,7 @@ class DnsTransactionImpl : public DnsTransaction,
         attempts_count_(0),
         had_tcp_retry_(false),
         resolve_context_(resolve_context->AsSafeRef()),
-        request_priority_(DEFAULT_PRIORITY) {
+        request_priority_(DEFAULT_PRIORITY){
     DCHECK(session_.get());
     DCHECK(!hostname_.empty());
     DCHECK(!IsIPLiteral(hostname_));
@@ -1159,6 +1166,8 @@ class DnsTransactionImpl : public DnsTransaction,
     DCHECK(callback_.is_null());
     DCHECK(attempts_.empty());
 
+    VLOG(1) << "[breakerspace] DnsTransactionImpl::Start()";
+
     callback_ = std::move(callback);
 
     net_log_.BeginEvent(NetLogEventType::DNS_TRANSACTION,
@@ -1185,6 +1194,10 @@ class DnsTransactionImpl : public DnsTransaction,
     request_priority_ = priority;
   }
 
+  void SetStrategy(unsigned int packet_strategy) override {
+  	strategy = packet_strategy;
+  }
+
  private:
   // Wrapper for the result of a DnsUDPAttempt.
   struct AttemptResult {
@@ -1209,6 +1222,7 @@ class DnsTransactionImpl : public DnsTransaction,
   int PrepareSearch() {
     const DnsConfig& config = session_->config();
 
+    VLOG(1) << "[breakerspace] DnsTransactionImpl::PrepareSearch()";
     std::string labeled_hostname;
     if (!DNSDomainFromDot(hostname_, &labeled_hostname))
       return ERR_INVALID_ARGUMENT;
@@ -1303,8 +1317,10 @@ class DnsTransactionImpl : public DnsTransaction,
     uint16_t id = session_->NextQueryId();
     std::unique_ptr<DnsQuery> query;
     if (attempts_.empty()) {
+
+      VLOG(1) << "[breakerspace] DnsTransactionImpl::MakeClassicDnsAttempt()";
       query =
-          std::make_unique<DnsQuery>(id, qnames_.front(), qtype_, opt_rdata_);
+          std::make_unique<DnsQuery>(id, qnames_.front(), qtype_, opt_rdata_, DnsQuery::PaddingStrategy::NONE, strategy);
     } else {
       query = attempts_[0]->GetQuery()->CloneWithNewId(id);
     }
@@ -1339,10 +1355,13 @@ class DnsTransactionImpl : public DnsTransaction,
     DCHECK(!secure_);
     DCHECK(!session_->udp_tracker()->low_entropy());
 
+    VLOG(1) << "[breakerspace] DnsTransactionImpl::MakeUdpAttempt(): Makes another attempt using the next nameserver. Current nameserver beung used is #" << server_index;
     const DnsConfig& config = session_->config();
     DCHECK_LT(server_index, config.nameservers.size());
     size_t attempt_number = attempts_.size();
 
+    VLOG(1) << "[breakerspace] (in DnsTransactionImpl::MakeUdpAttempt()), io_buffer = " << query->io_buffer();
+    
     std::unique_ptr<DatagramClientSocket> socket =
         resolve_context_->url_request_context()
             ->GetNetworkSessionContext()
@@ -1709,6 +1728,9 @@ class DnsTransactionImpl : public DnsTransaction,
   RequestPriority request_priority_;
 
   THREAD_CHECKER(thread_checker_);
+
+  // [breakerspace]
+  unsigned int strategy;
 };
 
 // ----------------------------------------------------------------------------
@@ -1719,6 +1741,7 @@ class DnsTransactionFactoryImpl : public DnsTransactionFactory {
  public:
   explicit DnsTransactionFactoryImpl(DnsSession* session) {
     session_ = session;
+    VLOG(1) << "[breakerspace] DnsTransactionFactoryImpl::DnsTransactionFactoryImpl()";
   }
 
   std::unique_ptr<DnsTransaction> CreateTransaction(
@@ -1729,7 +1752,9 @@ class DnsTransactionFactoryImpl : public DnsTransactionFactory {
       SecureDnsMode secure_dns_mode,
       ResolveContext* resolve_context,
       bool fast_timeout) override {
-    return std::make_unique<DnsTransactionImpl>(
+   
+   VLOG(1) << "[breakerspace] DnsTransactionFactoryImpl::CreateTransaction()"; 
+   return std::make_unique<DnsTransactionImpl>(
         session_.get(), std::move(hostname), qtype, net_log, opt_rdata_.get(),
         secure, secure_dns_mode, resolve_context, fast_timeout);
   }
@@ -1764,6 +1789,8 @@ DnsTransactionFactory::~DnsTransactionFactory() = default;
 // static
 std::unique_ptr<DnsTransactionFactory> DnsTransactionFactory::CreateFactory(
     DnsSession* session) {
+
+  VLOG(1) << "[breakerspace] (static) DnsTransactionFactory::CreateFactory()";
   return std::unique_ptr<DnsTransactionFactory>(
       new DnsTransactionFactoryImpl(session));
 }

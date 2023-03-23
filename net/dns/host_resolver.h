@@ -192,7 +192,9 @@ class NET_EXPORT HostResolver {
     // Initial setting for whether the insecure portion of the built-in
     // asynchronous DnsClient is enabled or disabled. See HostResolverManager::
     // SetInsecureDnsClientEnabled() for details.
-    bool insecure_dns_client_enabled = false;
+    // [breakerspace] THIS MIGHT BE WHERE WE WANT TO CHANGE DEFAULTS -- CHECK THE README
+    //bool insecure_dns_client_enabled = false;
+    bool insecure_dns_client_enabled = true;
 
     // Initial setting for whether additional DNS types (e.g. HTTPS) may be
     // queried when using the built-in resolver for insecure DNS.
@@ -459,6 +461,9 @@ class NET_EXPORT HostResolver {
       const std::vector<HostResolverEndpointResult>& endpoints,
       const std::set<std::string>& aliases);
 
+ // [breakerspace]
+ virtual void SetStrategyInManager(unsigned int packet_strategy);
+ 
  protected:
   HostResolver();
 

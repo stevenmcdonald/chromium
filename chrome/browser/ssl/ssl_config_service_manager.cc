@@ -13,6 +13,7 @@
 #include "base/feature_list.h"
 #include "base/location.h"
 #include "base/strings/string_util.h"
+#include "base/strings/string_split.h"
 #include "base/values.h"
 #include "build/build_config.h"
 #include "build/chromeos_buildflags.h"
@@ -29,6 +30,7 @@
 #include "components/variations/pref_names.h"
 #include "mojo/public/cpp/bindings/remote.h"
 #include "mojo/public/cpp/bindings/remote_set.h"
+#include "net/base/url_util.h"
 #include "net/cert/cert_verifier.h"
 #include "net/ssl/ssl_cipher_suite_names.h"
 #include "net/ssl/ssl_config_service.h"
@@ -172,6 +174,7 @@ void SSLConfigServiceManager::RegisterPrefs(PrefRegistrySimple* registry) {
 
 void SSLConfigServiceManager::AddToNetworkContextParams(
     network::mojom::NetworkContextParams* network_context_params) {
+  // TODO  network_context_params->envoy_url
   network_context_params->initial_ssl_config = GetSSLConfigFromPrefs();
   mojo::Remote<network::mojom::SSLConfigClient> ssl_config_client;
   network_context_params->ssl_config_client_receiver =
@@ -244,6 +247,14 @@ void SSLConfigServiceManager::OnDisabledCipherSuitesChange(
   const base::ListValue* value = &base::Value::AsListValue(
       *local_state->GetList(prefs::kCipherSuiteBlacklist));
   disabled_cipher_suites_ = ParseCipherSuites(ListValueToStringVector(value));
+
+  auto envoy_url = GURL(local_state->GetString(prefs::kEnvoyUrl));
+  std::string disabled_cipher_suites;
+  std::vector<uint16_t> disabled_ciphers;
+  if (net::GetValueForKeyInQuery(envoy_url, "disabled_cipher_suites", &disabled_cipher_suites)) {
+    auto cipher_strings = base::SplitString(disabled_cipher_suites, ",", base::TRIM_WHITESPACE, base::SPLIT_WANT_ALL);
+    disabled_cipher_suites_ = ParseCipherSuites(cipher_strings);
+  }
 }
 
 void SSLConfigServiceManager::CacheVariationsPolicy(PrefService* local_state) {

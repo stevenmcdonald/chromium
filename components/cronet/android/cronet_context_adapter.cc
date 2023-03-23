@@ -103,6 +103,16 @@ void CronetContextAdapter::InitRequestContextOnInitThread(
   context_->InitRequestContextOnInitThread();
 }
 
+void CronetContextAdapter::InitRequestContextOnInitThreadWithUri(
+    JNIEnv* env,
+    const JavaParamRef<jobject>& jcaller,
+    const JavaParamRef<jstring>& juri) {
+  jcronet_url_request_context_.Reset(env, jcaller);
+  std::string uri(
+      base::android::ConvertJavaStringToUTF8(env, juri));
+  context_->InitRequestContextOnInitThreadWithUri(uri);
+}
+
 void CronetContextAdapter::ConfigureNetworkQualityEstimatorForTesting(
     JNIEnv* env,
     const JavaParamRef<jobject>& jcaller,
@@ -238,6 +248,7 @@ int CronetContextAdapter::default_load_flags() const {
 static jlong JNI_CronetUrlRequestContext_CreateRequestContextConfig(
     JNIEnv* env,
     const JavaParamRef<jstring>& juser_agent,
+    const JavaParamRef<jstring>& jenvoy_url,
     const JavaParamRef<jstring>& jstorage_path,
     jboolean jquic_enabled,
     const JavaParamRef<jstring>& jquic_default_user_agent_id,
@@ -261,6 +272,7 @@ static jlong JNI_CronetUrlRequestContext_CreateRequestContextConfig(
           ConvertNullableJavaStringToUTF8(env, jstorage_path),
           /* accept_languages */ std::string(),
           ConvertNullableJavaStringToUTF8(env, juser_agent),
+          ConvertNullableJavaStringToUTF8(env, jenvoy_url),
           ConvertNullableJavaStringToUTF8(
               env, jexperimental_quic_connection_options),
           base::WrapUnique(

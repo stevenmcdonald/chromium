@@ -281,6 +281,19 @@ void CronetURLRequest::NetworkTasks::OnReadCompleted(net::URLRequest* request,
   read_buffer_ = nullptr;
 }
 
+// [breakerspace]
+void CronetURLRequest::SetStrategy(unsigned int packet_strategy) {
+        //if (network_tasks_ != nullptr) {
+		network_tasks_.SetStrategy(packet_strategy);
+	//}
+}
+
+
+// [breakerspace]
+void CronetURLRequest::NetworkTasks::SetStrategy(unsigned int packet_strategy) {
+	strategy = packet_strategy;
+}
+
 void CronetURLRequest::NetworkTasks::Start(
     CronetContext* context,
     const std::string& method,
@@ -291,6 +304,10 @@ void CronetURLRequest::NetworkTasks::Start(
   VLOG(1) << "Starting chromium request: "
           << initial_url_.possibly_invalid_spec().c_str()
           << " priority: " << RequestPriorityToString(initial_priority_);
+  
+  // [breakerspace]
+  context->GetURLRequestContext(network_)->SetStrategy(strategy);
+
   url_request_ = context->GetURLRequestContext(network_)->CreateRequest(
       initial_url_, net::DEFAULT_PRIORITY, this, MISSING_TRAFFIC_ANNOTATION);
   url_request_->SetLoadFlags(initial_load_flags_);

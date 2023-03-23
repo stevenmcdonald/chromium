@@ -82,6 +82,8 @@ class NET_EXPORT ContextHostResolver : public HostResolver {
   void SetProcParamsForTesting(const ProcTaskParams& proc_params);
   void SetTickClockForTesting(const base::TickClock* tick_clock);
 
+  //[breakerspace]
+  void SetStrategyInManager(unsigned int packet_strategy) override;
  private:
   const raw_ptr<HostResolverManager> manager_;
   std::unique_ptr<HostResolverManager> owned_manager_;

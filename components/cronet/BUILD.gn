@@ -101,6 +101,27 @@ if (is_android) {
     testonly = true
     deps = [ "//components/cronet/android:cronet_package_android" ]
   }
+  executable("cronet_sample") {
+    testonly = true
+    sources = [
+      "native/sample/main.cc",
+      "native/sample/sample_executor.cc",
+      "native/sample/sample_executor.h",
+      "native/sample/sample_url_request_callback.cc",
+      "native/sample/sample_url_request_callback.h",
+
+      "cronet_global_state_stubs.cc",
+    ]
+    deps = [
+      "//base",
+      "//net",
+      "//components/cronet/native:cronet_native_headers",
+      "//components/cronet/native:cronet_native_impl",
+    ]
+    if ((is_linux || is_chromeos) && !is_component_build) {
+      public_configs = [ "//build/config/gcc:rpath_for_built_shared_libraries" ]
+    }
+  }
 } else if (is_ios) {
   group("cronet_package") {
     deps = [ "//components/cronet/ios:cronet_package_ios" ]
