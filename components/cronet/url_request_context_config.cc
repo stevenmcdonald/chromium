@@ -287,6 +287,46 @@ URLRequestContextConfig::URLRequestContextConfig(
     const std::string& storage_path,
     const std::string& accept_language,
     const std::string& user_agent,
+    const std::string& envoy_url,
+    base::Value::Dict experimental_options,
+    std::unique_ptr<net::CertVerifier> mock_cert_verifier,
+    bool enable_network_quality_estimator,
+    bool bypass_public_key_pinning_for_local_trust_anchors,
+    absl::optional<double> network_thread_priority)
+    : enable_quic(enable_quic),
+      quic_user_agent_id(quic_user_agent_id),
+      enable_spdy(enable_spdy),
+      enable_brotli(enable_brotli),
+      http_cache(http_cache),
+      http_cache_max_size(http_cache_max_size),
+      load_disable_cache(load_disable_cache),
+      storage_path(storage_path),
+      accept_language(accept_language),
+      user_agent(user_agent),
+      envoy_url(envoy_url),
+      mock_cert_verifier(std::move(mock_cert_verifier)),
+      enable_network_quality_estimator(enable_network_quality_estimator),
+      bypass_public_key_pinning_for_local_trust_anchors(
+          bypass_public_key_pinning_for_local_trust_anchors),
+      effective_experimental_options(experimental_options.Clone()),
+      experimental_options(std::move(experimental_options)),
+      network_thread_priority(network_thread_priority),
+      bidi_stream_detect_broken_connection(false),
+      heartbeat_interval(base::Seconds(0)) {
+  SetContextConfigExperimentalOptions();
+}
+
+URLRequestContextConfig::URLRequestContextConfig(
+    bool enable_quic,
+    const std::string& quic_user_agent_id,
+    bool enable_spdy,
+    bool enable_brotli,
+    HttpCacheType http_cache,
+    int http_cache_max_size,
+    bool load_disable_cache,
+    const std::string& storage_path,
+    const std::string& accept_language,
+    const std::string& user_agent,
     base::Value::Dict experimental_options,
     std::unique_ptr<net::CertVerifier> mock_cert_verifier,
     bool enable_network_quality_estimator,
@@ -330,6 +370,7 @@ URLRequestContextConfig::CreateURLRequestContextConfig(
     const std::string& storage_path,
     const std::string& accept_language,
     const std::string& user_agent,
+    const std::string& envoy_url,
     const std::string& unparsed_experimental_options,
     std::unique_ptr<net::CertVerifier> mock_cert_verifier,
     bool enable_network_quality_estimator,
@@ -348,7 +389,7 @@ URLRequestContextConfig::CreateURLRequestContextConfig(
   return base::WrapUnique(new URLRequestContextConfig(
       enable_quic, quic_user_agent_id, enable_spdy, enable_brotli, http_cache,
       http_cache_max_size, load_disable_cache, storage_path, accept_language,
-      user_agent, std::move(experimental_options).value(),
+      user_agent, envoy_url, std::move(experimental_options).value(),
       std::move(mock_cert_verifier), enable_network_quality_estimator,
       bypass_public_key_pinning_for_local_trust_anchors,
       network_thread_priority));
@@ -871,6 +912,7 @@ void URLRequestContextConfig::ConfigureURLRequestContextBuilder(
   }
   context_builder->set_accept_language(accept_language);
   context_builder->set_user_agent(user_agent);
+  context_builder->set_envoy_url(envoy_url);
   net::HttpNetworkSessionParams session_params;
   session_params.enable_http2 = enable_spdy;
   session_params.enable_quic = enable_quic;
@@ -906,8 +948,8 @@ URLRequestContextConfigBuilder::Build() {
   return URLRequestContextConfig::CreateURLRequestContextConfig(
       enable_quic, quic_user_agent_id, enable_spdy, enable_brotli, http_cache,
       http_cache_max_size, load_disable_cache, storage_path, accept_language,
-      user_agent, experimental_options, std::move(mock_cert_verifier),
-      enable_network_quality_estimator,
+      user_agent, envoy_url, experimental_options,
+      std::move(mock_cert_verifier), enable_network_quality_estimator,
       bypass_public_key_pinning_for_local_trust_anchors,
       network_thread_priority);
 }

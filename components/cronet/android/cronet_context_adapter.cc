@@ -243,6 +243,7 @@ int CronetContextAdapter::default_load_flags() const {
 static jlong JNI_CronetUrlRequestContext_CreateRequestContextConfig(
     JNIEnv* env,
     const JavaParamRef<jstring>& juser_agent,
+    const JavaParamRef<jstring>& jenvoy_url,
     const JavaParamRef<jstring>& jstorage_path,
     jboolean jquic_enabled,
     const JavaParamRef<jstring>& jquic_default_user_agent_id,
@@ -266,6 +267,7 @@ static jlong JNI_CronetUrlRequestContext_CreateRequestContextConfig(
           ConvertNullableJavaStringToUTF8(env, jstorage_path),
           /* accept_languages */ std::string(),
           ConvertNullableJavaStringToUTF8(env, juser_agent),
+          ConvertNullableJavaStringToUTF8(env, jenvoy_url),
           ConvertNullableJavaStringToUTF8(
               env, jexperimental_quic_connection_options),
           base::WrapUnique(

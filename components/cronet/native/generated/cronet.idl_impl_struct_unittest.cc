@@ -107,6 +107,10 @@ TEST_F(CronetStructTest, TestCronet_EngineParams) {
                                      Cronet_EngineParams_user_agent_get(first));
   EXPECT_STREQ(Cronet_EngineParams_user_agent_get(first),
                Cronet_EngineParams_user_agent_get(second));
+  Cronet_EngineParams_envoy_url_set(second,
+                                    Cronet_EngineParams_envoy_url_get(first));
+  EXPECT_STREQ(Cronet_EngineParams_envoy_url_get(first),
+               Cronet_EngineParams_envoy_url_get(second));
   Cronet_EngineParams_accept_language_set(
       second, Cronet_EngineParams_accept_language_get(first));
   EXPECT_STREQ(Cronet_EngineParams_accept_language_get(first),

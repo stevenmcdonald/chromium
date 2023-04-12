@@ -249,7 +249,7 @@ public class CronetUrlRequestContext extends CronetEngineBase {
     public static long createNativeUrlRequestContextConfig(CronetEngineBuilderImpl builder) {
         final long urlRequestContextConfig =
                 CronetUrlRequestContextJni.get().createRequestContextConfig(builder.getUserAgent(),
-                        builder.storagePath(), builder.quicEnabled(),
+                        builder.getEnvoyUrl(), builder.storagePath(), builder.quicEnabled(),
                         builder.getDefaultQuicUserAgentId(), builder.http2Enabled(),
                         builder.brotliEnabled(), builder.cacheDisabled(), builder.httpCacheMode(),
                         builder.httpCacheMaxSize(), builder.experimentalOptions(),
@@ -785,10 +785,10 @@ public class CronetUrlRequestContext extends CronetEngineBase {
     // Native methods are implemented in cronet_url_request_context_adapter.cc.
     @NativeMethods
     interface Natives {
-        long createRequestContextConfig(String userAgent, String storagePath, boolean quicEnabled,
-                String quicUserAgentId, boolean http2Enabled, boolean brotliEnabled,
-                boolean disableCache, int httpCacheMode, long httpCacheMaxSize,
-                String experimentalOptions, long mockCertVerifier,
+        long createRequestContextConfig(String userAgent, String envoyUrl, String storagePath,
+                boolean quicEnabled, String quicUserAgentId, boolean http2Enabled,
+                boolean brotliEnabled, boolean disableCache, int httpCacheMode,
+                long httpCacheMaxSize, String experimentalOptions, long mockCertVerifier,
                 boolean enableNetworkQualityEstimator,
                 boolean bypassPublicKeyPinningForLocalTrustAnchors, int networkThreadPriority);
 

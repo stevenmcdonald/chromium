@@ -113,6 +113,11 @@ public abstract class CronetEngine {
             return this;
         }
 
+        public Builder setEnvoyUrl(String envoyUrl) {
+            mBuilderDelegate.setEnvoyUrl(envoyUrl);
+            return this;
+        }
+
         /**
          * Sets directory for HTTP Cache and Cookie Storage. The directory must
          * exist.
