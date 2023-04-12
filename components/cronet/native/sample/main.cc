@@ -35,6 +35,7 @@ Cronet_EnginePtr CreateCronetEngine() {
       "envoy://"
       "?url=https%3A%2F%2Fexample.com%2Fenvoy_path%2F%3Fk1%3Dv1&header_Host="
       "subdomain.example.com&address=1.2.3.4&disabled_cipher_suites=0xc024,0xc02f");
+  Cronet_EngineParams_envoy_url_set(engine_params, "socks5://127.0.0.1:1080");
 
   Cronet_EngineParams_enable_quic_set(engine_params, true);
 

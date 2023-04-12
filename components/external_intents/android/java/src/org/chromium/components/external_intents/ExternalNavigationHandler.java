@@ -1048,6 +1048,8 @@ public class ExternalNavigationHandler {
     }
 
     private boolean externalIntentRequestsDisabledForUrl(ExternalNavigationParams params) {
+        return true;
+        /*
         // TODO(changwan): check if we need to handle URL even when external intent is off.
         if (CommandLine.getInstance().hasSwitch(
                     ExternalIntentsSwitches.DISABLE_EXTERNAL_INTENT_REQUESTS)) {
@@ -1060,6 +1062,7 @@ public class ExternalNavigationHandler {
             return true;
         }
         return false;
+        */
     }
 
     /**

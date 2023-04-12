@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include "base/memory/scoped_refptr.h"
+#include "base/strings/string_piece.h"
 #include "base/task/sequenced_task_runner.h"
 
 namespace net {
@@ -32,6 +33,9 @@ void PostTaskToInitThread(const base::Location& posted_from,
 // network notifications on. The implementation must be thread-safe and
 // idempotent, and must complete initialization before returning.
 void EnsureInitialized();
+
+std::unique_ptr<net::ProxyConfigService> CreateFixedProxyConfigService(
+    const scoped_refptr<base::SequencedTaskRunner>& io_task_runner, base::StringPiece uri);
 
 // Creates a proxy config service appropriate for this platform that fetches the
 // system proxy settings. Cronet will call this API only after a prior call

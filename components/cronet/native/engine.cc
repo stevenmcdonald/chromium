@@ -200,9 +200,16 @@ Cronet_RESULT Cronet_EngineImpl::StartWithParams(
   // @VisibleForTesting (as the only external use will be in a test).
 
   // Initialize context on the init thread.
+  if (params->envoy_url.rfind("socks5://", 0) != 0) {
   cronet::PostTaskToInitThread(
       FROM_HERE, base::BindOnce(&CronetContext::InitRequestContextOnInitThread,
                                 base::Unretained(context_.get())));
+  } else {
+      cronet::PostTaskToInitThread(
+          FROM_HERE,
+          base::BindOnce(&CronetContext::InitRequestContextOnInitThreadWithUri,
+                         base::Unretained(context_.get()), params->envoy_url));
+  }
   return CheckResult(Cronet_RESULT_SUCCESS);
 }
 

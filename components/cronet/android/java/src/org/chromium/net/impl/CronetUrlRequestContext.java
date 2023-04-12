@@ -234,8 +234,13 @@ public class CronetUrlRequestContext extends CronetEngineBase {
                     // mUrlRequestContextAdapter is guaranteed to exist until
                     // initialization on init and network threads completes and
                     // initNetworkThread is called back on network thread.
+		    if (builder.getEnvoyUrl() != null && builder.getEnvoyUrl().startsWith("socks5://")) {
+			    CronetUrlRequestContextJni.get().initRequestContextOnInitThreadWithUri(
+				    mUrlRequestContextAdapter, CronetUrlRequestContext.this, builder.getEnvoyUrl());
+		    } else {
                     CronetUrlRequestContextJni.get().initRequestContextOnInitThread(
                             mUrlRequestContextAdapter, CronetUrlRequestContext.this);
+		    }
                 }
             }
         });
@@ -825,6 +830,9 @@ public class CronetUrlRequestContext extends CronetEngineBase {
 
         @NativeClassQualifiedName("CronetContextAdapter")
         void initRequestContextOnInitThread(long nativePtr, CronetUrlRequestContext caller);
+
+        @NativeClassQualifiedName("CronetContextAdapter")
+        void initRequestContextOnInitThreadWithUri(long nativePtr, CronetUrlRequestContext caller, String uri);
 
         @NativeClassQualifiedName("CronetContextAdapter")
         void configureNetworkQualityEstimatorForTesting(long nativePtr,
