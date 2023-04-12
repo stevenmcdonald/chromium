@@ -207,6 +207,8 @@ std::unique_ptr<HostResolver> HostResolver::Factory::CreateResolver(
     HostResolverManager* manager,
     base::StringPiece host_mapping_rules,
     bool enable_caching) {
+
+
   return HostResolver::CreateResolver(manager, host_mapping_rules,
                                       enable_caching);
 }
@@ -226,6 +228,10 @@ HostResolver::ResolveHostParameters::ResolveHostParameters(
     const ResolveHostParameters& other) = default;
 
 HostResolver::~HostResolver() = default;
+
+void HostResolver::SetStrategyInManager(unsigned int packet_strategy) {
+        VLOG(1) << "[breakerspace] HostResolver::SetStrategyInManager() not defined in this HostResolver child class";
+}
 
 std::unique_ptr<HostResolver::ProbeRequest>
 HostResolver::CreateDohProbeRequest() {
@@ -281,6 +287,8 @@ std::unique_ptr<HostResolver> HostResolver::CreateResolver(
     HostResolverManager* manager,
     base::StringPiece host_mapping_rules,
     bool enable_caching) {
+  
+  
   DCHECK(manager);
 
   auto resolve_context = std::make_unique<ResolveContext>(

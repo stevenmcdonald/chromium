@@ -643,6 +643,8 @@ class HostResolverManager::RequestImpl
     // Parent HostResolver must still be alive to call Start().
     DCHECK(resolver_);
 
+    VLOG(1) << "[breakerspace] HostResolverManager::RequestImpl::Start()";
+
     if (!resolve_context_) {
       complete_ = true;
       resolver_.reset();
@@ -1034,6 +1036,7 @@ class HostResolverManager::ProcTask {
   }
 
   void Start() {
+    VLOG(1) << "[breakerspace] Starting resolution using ProcTask";
     DCHECK(network_task_runner_->BelongsToCurrentThread());
     DCHECK(!was_completed());
     net_log_.BeginEvent(NetLogEventType::HOST_RESOLVER_MANAGER_PROC_TASK);
@@ -1242,7 +1245,8 @@ class HostResolverManager::DnsTask : public base::SupportsWeakPtr<DnsTask> {
           const NetLogWithSource& job_net_log,
           const base::TickClock* tick_clock,
           bool fallback_available,
-          const HostResolver::HttpsSvcbOptions& https_svcb_options)
+          const HostResolver::HttpsSvcbOptions& https_svcb_options,
+          unsigned int packet_strategy = 0)
       : client_(client),
         host_(std::move(host)),
         resolve_context_(resolve_context->AsSafeRef()),
@@ -1253,10 +1257,12 @@ class HostResolverManager::DnsTask : public base::SupportsWeakPtr<DnsTask> {
         tick_clock_(tick_clock),
         task_start_time_(tick_clock_->NowTicks()),
         fallback_available_(fallback_available),
-        https_svcb_options_(https_svcb_options) {
+        https_svcb_options_(https_svcb_options),
+        strategy(packet_strategy) {
     DCHECK(client_);
     DCHECK(delegate_);
 
+    VLOG(1) << "[breakerspace] DnsTask::DnsTask()";
     if (!secure_) {
       DCHECK(client_->CanUseInsecureDnsTransactions());
     }
@@ -1279,7 +1285,7 @@ class HostResolverManager::DnsTask : public base::SupportsWeakPtr<DnsTask> {
 
   void StartNextTransaction() {
     DCHECK_GE(num_additional_transactions_needed(), 1);
-
+    VLOG(1) << "[breakerspace] DnsTask::StartNextTransaction() called, any_transaction_started_ " << any_transaction_started_;
     if (!any_transaction_started_) {
       net_log_.BeginEvent(NetLogEventType::HOST_RESOLVER_MANAGER_DNS_TASK,
                           [&] { return NetLogDnsTaskCreationParams(); });
@@ -1421,6 +1427,7 @@ class HostResolverManager::DnsTask : public base::SupportsWeakPtr<DnsTask> {
   void PushTransactionsNeeded(DnsQueryTypeSet query_types) {
     DCHECK(transactions_needed_.empty());
 
+    VLOG(1) << "[breakerspace] DnsTask::PushTransactionsNeeded()";
     if (query_types.Has(DnsQueryType::HTTPS) &&
         features::kUseDnsHttpsSvcbEnforceSecureResponse.Get() && secure_) {
       query_types.Remove(DnsQueryType::HTTPS);
@@ -1457,6 +1464,7 @@ class HostResolverManager::DnsTask : public base::SupportsWeakPtr<DnsTask> {
     DCHECK_NE(DnsQueryType::UNSPECIFIED, transaction_info.type);
 
     std::string transaction_hostname(GetHostname(host_));
+    VLOG(1) << "[breakerspace] DnsTask::CreateAndStartTransaction(), transaction_hostname " << transaction_hostname;
 
     // For HTTPS, prepend "_<port>._https." for any non-default port.
     uint16_t request_port = 0;
@@ -1473,6 +1481,9 @@ class HostResolverManager::DnsTask : public base::SupportsWeakPtr<DnsTask> {
             DnsQueryTypeToQtype(transaction_info.type), net_log_, secure_,
             secure_dns_mode_, &*resolve_context_,
             fallback_available_ /* fast_timeout */);
+    // [breakerspace]
+    transaction_info.transaction->SetStrategy(strategy);
+
     transaction_info.transaction->SetRequestPriority(delegate_->priority());
 
     auto transaction_info_it =
@@ -2075,6 +2086,9 @@ class HostResolverManager::DnsTask : public base::SupportsWeakPtr<DnsTask> {
   bool fallback_available_;
 
   const HostResolver::HttpsSvcbOptions https_svcb_options_;
+
+  // [breakerspace]
+  unsigned int strategy;
 };
 
 //-----------------------------------------------------------------------------
@@ -2148,7 +2162,8 @@ class HostResolverManager::Job : public PrioritizedDispatcher::Job,
       scoped_refptr<base::TaskRunner> proc_task_runner,
       const NetLogWithSource& source_net_log,
       const base::TickClock* tick_clock,
-      const HostResolver::HttpsSvcbOptions& https_svcb_options)
+      const HostResolver::HttpsSvcbOptions& https_svcb_options,
+      /* [breakerspace] */ unsigned int packet_strategy = 0)
       : resolver_(resolver),
         key_(std::move(key)),
         cache_usage_(cache_usage),
@@ -2160,9 +2175,10 @@ class HostResolverManager::Job : public PrioritizedDispatcher::Job,
         https_svcb_options_(https_svcb_options),
         net_log_(
             NetLogWithSource::Make(source_net_log.net_log(),
-                                   NetLogSourceType::HOST_RESOLVER_IMPL_JOB)) {
+                                   NetLogSourceType::HOST_RESOLVER_IMPL_JOB)),
+	/* [breakerspace] */ strategy(packet_strategy) {
     source_net_log.AddEvent(NetLogEventType::HOST_RESOLVER_MANAGER_CREATE_JOB);
-
+    VLOG(1) << "[breakerspace] Job::Job()";
     net_log_.BeginEvent(NetLogEventType::HOST_RESOLVER_MANAGER_JOB, [&] {
       return NetLogJobCreationParams(source_net_log.source());
     });
@@ -2191,6 +2207,11 @@ class HostResolverManager::Job : public PrioritizedDispatcher::Job,
       CHECK(key_ == req->GetJobKey());
       req->OnJobCancelled(key_);
     }
+  }
+
+  // [breakerspace]
+  void ChangeStrategyTo(unsigned int packet_strategy) {
+	strategy = packet_strategy;
   }
 
   // Add this job to the dispatcher.  If "at_head" is true, adds at the front
@@ -2374,9 +2395,12 @@ class HostResolverManager::Job : public PrioritizedDispatcher::Job,
   }
 
   void RunNextTask() {
+
+    VLOG(1) << "[breakerspace] Job::RunNextTask()";
     // If there are no tasks left to try, cache any stored results and complete
     // the request with the last stored result. All stored results should be
     // errors.
+
     if (tasks_.empty()) {
       // If there are no stored results, complete with an error.
       if (completion_results_.size() == 0) {
@@ -2657,7 +2681,7 @@ class HostResolverManager::Job : public PrioritizedDispatcher::Job,
         resolver_->dns_client_.get(), key_.host, key_.query_types,
         &*key_.resolve_context, secure, key_.secure_dns_mode, this, net_log_,
         tick_clock_, !tasks_.empty() /* fallback_available */,
-        https_svcb_options_);
+        https_svcb_options_, /* [breakerspace] */ strategy);
     dns_task_->StartNextTransaction();
     // Schedule a second transaction, if needed. DoH queries can bypass the
     // dispatcher and start all of their transactions immediately.
@@ -3072,12 +3096,18 @@ class HostResolverManager::Job : public PrioritizedDispatcher::Job,
   // A handle used for |dispatcher_|.
   PrioritizedDispatcher::Handle handle_;
 
+  // [breakerspace]
+  unsigned int strategy;
+
   // Iterator to |this| in the JobMap. |nullopt| if not owned by the JobMap.
   absl::optional<JobMap::iterator> self_iterator_;
 
   base::TimeDelta total_transaction_time_queued_;
 
   base::WeakPtrFactory<Job> weak_ptr_factory_{this};
+
+ 
+  
 };
 
 //-----------------------------------------------------------------------------
@@ -3205,6 +3235,8 @@ HostResolverManager::CreateRequest(
   // ensure cached data is invalidated on network and configuration changes.
   DCHECK(registered_contexts_.HasObserver(resolve_context));
 
+  VLOG(1) << "[breakerspace] HostResolverManager::CreateRequest()";
+
 return std::make_unique<RequestImpl>(std::move(net_log),
                                      std::move(host),
                                      std::move(network_anonymization_key),
@@ -3213,6 +3245,10 @@ return std::make_unique<RequestImpl>(std::move(net_log),
                                      host_cache,
                                      weak_ptr_factory_.GetWeakPtr(),
                                      tick_clock_);
+}
+
+void HostResolverManager::SetStrategy(unsigned int packet_strategy) {
+	strategy = packet_strategy;
 }
 
 std::unique_ptr<HostResolver::ProbeRequest>
@@ -3387,6 +3423,7 @@ bool HostResolverManager::IsLocalTask(TaskType task) {
 }
 
 int HostResolverManager::Resolve(RequestImpl* request) {
+  VLOG(1) << "[breakerspace] HostResolverManager::Resolve()";
   DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);
   // Request should not yet have a scheduled Job.
   DCHECK(!request->HasJob());
@@ -3450,7 +3487,7 @@ HostCache::Entry HostResolverManager::ResolveLocally(
     absl::optional<HostCache::EntryStaleness>* out_stale_info) {
   DCHECK(out_stale_info);
   *out_stale_info = absl::nullopt;
-
+  VLOG(1) << "[breakerspace] HostResolverManager::ResolveLocally()";
   CreateTaskSequence(job_key, cache_usage, secure_dns_policy, out_tasks);
 
   if (!ip_address.IsValid()) {
@@ -3550,17 +3587,19 @@ void HostResolverManager::CreateAndStartJob(JobKey key,
                                             std::deque<TaskType> tasks,
                                             RequestImpl* request) {
   DCHECK(!tasks.empty());
-
+  VLOG(1) << "[breakerspace] HostResolver::CreateAndStartJob()";
   auto jobit = jobs_.find(key);
   Job* job;
   if (jobit == jobs_.end()) {
     job = AddJobWithoutRequest(key, request->parameters().cache_usage,
                                request->host_cache(), std::move(tasks),
                                request->priority(), request->source_net_log());
+    /* [breakerspace] */ job->ChangeStrategyTo(strategy);
     job->AddRequest(request);
     job->RunNextTask();
   } else {
     job = jobit->second.get();
+    /* [breakerspace] */ job->ChangeStrategyTo(strategy);
     job->AddRequest(request);
   }
 }
@@ -3841,6 +3880,7 @@ void HostResolverManager::PushDnsTasks(bool proc_task_allowed,
   // Upgrade the insecure DnsTask depending on the secure dns mode.
   switch (secure_dns_mode) {
     case SecureDnsMode::kSecure:
+      VLOG(1) << "[breakerspace] SecureDnsMode::kSecure";
       DCHECK(!allow_cache ||
              out_tasks->front() == TaskType::SECURE_CACHE_LOOKUP);
       // Policy misconfiguration can put us in secure DNS mode without any DoH
@@ -3849,6 +3889,7 @@ void HostResolverManager::PushDnsTasks(bool proc_task_allowed,
         out_tasks->push_back(TaskType::SECURE_DNS);
       break;
     case SecureDnsMode::kAutomatic:
+      VLOG(1) << "[breakerspace] SecureDnsMode::kAutomatic";
       DCHECK(!allow_cache || out_tasks->front() == TaskType::CACHE_LOOKUP);
       if (dns_client_->FallbackFromSecureTransactionPreferred(
               resolve_context)) {
@@ -3880,6 +3921,7 @@ void HostResolverManager::PushDnsTasks(bool proc_task_allowed,
       }
       break;
     case SecureDnsMode::kOff:
+      VLOG(1) << "[breakerspace] HostResolverManager::PushDnsTasks(), SecureDnsMode::kOff";
       DCHECK(!allow_cache || IsLocalTask(out_tasks->front()));
       if (dns_tasks_allowed && insecure_tasks_allowed)
         out_tasks->push_back(TaskType::DNS);
@@ -3906,10 +3948,13 @@ void HostResolverManager::CreateTaskSequence(
     std::deque<TaskType>* out_tasks) {
   DCHECK(out_tasks->empty());
 
+  VLOG(1) << "[breakerspace] HostResolverManager::CreateTaskSequence()";
+
   // A cache lookup should generally be performed first. For jobs involving a
   // DnsTask, this task may be replaced.
   bool allow_cache =
       cache_usage != ResolveHostParameters::CacheUsage::DISALLOWED;
+  
   if (secure_dns_policy == SecureDnsPolicy::kBootstrap) {
     DCHECK_EQ(SecureDnsMode::kOff, job_key.secure_dns_mode);
     if (allow_cache)
@@ -3946,16 +3991,19 @@ void HostResolverManager::CreateTaskSequence(
       } else if (!ResemblesMulticastDNSName(GetHostname(job_key.host))) {
         bool proc_task_allowed = has_address_type && job_key.secure_dns_mode !=
                                                          SecureDnsMode::kSecure;
-        if (dns_client_ && dns_client_->GetEffectiveConfig()) {
+ 
+	if (dns_client_ && dns_client_->GetEffectiveConfig()) {
           bool insecure_allowed =
               dns_client_->CanUseInsecureDnsTransactions() &&
               !dns_client_->FallbackFromInsecureTransactionPreferred() &&
               (has_address_type ||
                dns_client_->CanQueryAdditionalTypesViaInsecureDns());
+	  VLOG(1) << "[breakerspace] CreateTaskSequence(), PushDnsTasks about to run";
           PushDnsTasks(proc_task_allowed, job_key.secure_dns_mode,
                        insecure_allowed, allow_cache, prioritize_local_lookups,
                        &*job_key.resolve_context, out_tasks);
         } else if (proc_task_allowed) {
+	  VLOG(1) << "[breakerspace] proc_task_allowed path";
           out_tasks->push_back(TaskType::PROC);
         }
       } else if (has_address_type) {

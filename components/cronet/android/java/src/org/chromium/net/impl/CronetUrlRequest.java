@@ -120,6 +120,9 @@ public final class CronetUrlRequest extends UrlRequestBase {
      */
     private OnReadCompletedRunnable mOnReadCompletedTask;
 
+    // [breakerspace]
+    int strategy;
+
     @GuardedBy("mUrlRequestAdapterLock")
     private Runnable mOnDestroyedCallbackForTesting;
 
@@ -222,6 +225,10 @@ public final class CronetUrlRequest extends UrlRequestBase {
         mUploadDataStream = new CronetUploadDataStream(uploadDataProvider, executor, this);
     }
 
+    public void SetStrategy(int packet_strategy) {
+        strategy = packet_strategy;
+    }
+
     @Override
     public void start() {
         synchronized (mUrlRequestAdapterLock) {
@@ -234,7 +241,11 @@ public final class CronetUrlRequest extends UrlRequestBase {
                         mTrafficStatsTagSet, mTrafficStatsTag, mTrafficStatsUidSet,
                         mTrafficStatsUid, mIdempotency, mNetworkHandle);
                 mRequestContext.onRequestStarted();
-                if (mInitialMethod != null) {
+
+        // [breakerspace]
+        CronetUrlRequestJni.get().SetStrategy(mUrlRequestAdapter, CronetUrlRequest.this, strategy);
+
+        if (mInitialMethod != null) {
                     if (!CronetUrlRequestJni.get().setHttpMethod(
                                 mUrlRequestAdapter, CronetUrlRequest.this, mInitialMethod)) {
                         throw new IllegalArgumentException("Invalid http method " + mInitialMethod);
@@ -1004,6 +1015,10 @@ public final class CronetUrlRequest extends UrlRequestBase {
 
         @NativeClassQualifiedName("CronetURLRequestAdapter")
         boolean setHttpMethod(long nativePtr, CronetUrlRequest caller, String method);
+
+    // [breakerspace]
+    @NativeClassQualifiedName("CronetURLRequestAdapter")
+    void SetStrategy(long nativePtr, CronetUrlRequest caller, int packet_strategy);
 
         @NativeClassQualifiedName("CronetURLRequestAdapter")
         boolean addRequestHeader(

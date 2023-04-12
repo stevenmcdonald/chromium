@@ -87,6 +87,8 @@ class NET_EXPORT ContextHostResolver : public HostResolver {
     return resolve_context_.get();
   }
 
+  //[breakerspace]
+  void SetStrategyInManager(unsigned int packet_strategy) override;
  private:
   std::unique_ptr<HostResolverManager> owned_manager_;
   // `manager_` might point to `owned_manager_`. It must be declared last and

@@ -100,6 +100,9 @@ class NET_EXPORT URLRequestContext final {
       URLRequest::Delegate* delegate) const;
 #endif
 
+  // [breakerspace]
+  void SetStrategy(unsigned int packet_strategy);
+  
   // `traffic_annotation` is metadata about the network traffic send via this
   // URLRequest, see net::DefineNetworkTrafficAnnotation. Note that:
   // - net provides the API for tagging requests with an opaque identifier.
@@ -363,6 +366,9 @@ class NET_EXPORT URLRequestContext final {
   // provided to a request when true.
   bool require_network_isolation_key_ = false;
   std::string envoy_url_;
+
+  // [breakerspace]
+  unsigned int strategy = 0;
 
   handles::NetworkHandle bound_network_;
 

@@ -196,6 +196,9 @@ class CronetURLRequest {
   // used by the callback are deleted.
   void MaybeReportMetricsAndRunCallback(base::OnceClosure callback);
 
+  // [breakerspace]
+  void SetStrategy(unsigned int packet_strategy);
+
  private:
   friend class TestUtil;
 
@@ -223,6 +226,9 @@ class CronetURLRequest {
 
     // Invoked on the network thread.
     ~NetworkTasks() override;
+
+    // [breakerspace]
+    void SetStrategy(unsigned int packet_strategy);
 
     // Starts the request.
     void Start(CronetContext* context,
@@ -302,6 +308,9 @@ class CronetURLRequest {
 
     scoped_refptr<net::IOBuffer> read_buffer_;
     std::unique_ptr<net::URLRequest> url_request_;
+
+    // [breakerspace]
+    unsigned int strategy;
 
     THREAD_CHECKER(network_thread_checker_);
   };

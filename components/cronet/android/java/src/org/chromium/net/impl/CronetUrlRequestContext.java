@@ -178,6 +178,9 @@ public class CronetUrlRequestContext extends CronetEngineBase {
         return mLogger;
     }
 
+    // [breakerspace]
+    private int strategy;
+
     @UsedByReflection("CronetEngine.java")
     public CronetUrlRequestContext(final CronetEngineBuilderImpl builder) {
         mCronetEngineId = hashCode();
@@ -277,6 +280,11 @@ public class CronetUrlRequestContext extends CronetEngineBase {
     }
 
     @Override
+    public void SetStrategy(int packet_strategy) {
+	strategy = packet_strategy;
+    }
+
+    @Override
     public UrlRequestBase createRequest(String url, UrlRequest.Callback callback, Executor executor,
             int priority, Collection<Object> requestAnnotations, boolean disableCache,
             boolean disableConnectionMigration, boolean allowDirectExecutor,
@@ -288,10 +296,13 @@ public class CronetUrlRequestContext extends CronetEngineBase {
         }
         synchronized (mLock) {
             checkHaveAdapter();
-            return new CronetUrlRequest(this, url, priority, callback, executor, requestAnnotations,
+            CronetUrlRequest temp = new CronetUrlRequest(this, url, priority, callback, executor, requestAnnotations,
                     disableCache, disableConnectionMigration, allowDirectExecutor,
                     trafficStatsTagSet, trafficStatsTag, trafficStatsUidSet, trafficStatsUid,
                     requestFinishedListener, idempotency, networkHandle);
+            temp.SetStrategy(strategy);
+
+            return temp;
         }
     }
 

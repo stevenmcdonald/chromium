@@ -52,4 +52,10 @@ public abstract class ICronetEngineBuilder {
     public ICronetEngineBuilder setThreadPriority(int priority) {
         return this;
     }
+
+    // [breakerspace]
+    public void SetStrategy(int packet_strategy) {
+        // default implementation does nothing
+        assert true;
+    }
 }

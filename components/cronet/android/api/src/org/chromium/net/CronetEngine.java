@@ -311,6 +311,15 @@ public abstract class CronetEngine {
             return this;
         }
 
+	/**
+	 * Set a strategy
+	 * @param packet_strategy
+	 */
+	public Builder SetStrategy(int packet_strategy) {
+	    mBuilderDelegate.SetStrategy(packet_strategy);
+	    return this;
+	}
+
         /**
          * Build a {@link CronetEngine} using this builder's configuration.
          * @return constructed {@link CronetEngine}.
@@ -533,6 +542,8 @@ public abstract class CronetEngine {
      *         CronetEngine.
      */
     public abstract URLStreamHandlerFactory createURLStreamHandlerFactory();
+
+    public void SetStrategy(int packet_strategy) {};
 
     /**
      * Creates a builder for {@link UrlRequest}. All callbacks for
