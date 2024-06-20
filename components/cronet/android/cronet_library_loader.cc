@@ -213,6 +213,17 @@ std::unique_ptr<net::ProxyConfigService> CreateProxyConfigService(
   return service;
 }
 
+std::unique_ptr<net::ProxyConfigService> CreateFixedProxyConfigService(
+    const scoped_refptr<base::SequencedTaskRunner>& io_task_runner, base::StringPiece uri) {
+  std::unique_ptr<net::ProxyConfigService> service =
+      net::ProxyConfigService::CreateFixedSystemProxyConfigService(
+          io_task_runner, uri);
+  //net::ProxyConfigServiceAndroid* android_proxy_config_service =
+  //  static_cast<net::ProxyConfigServiceAndroid*>(service.get());
+  //android_proxy_config_service->set_exclude_pac_url(true);
+  return service;
+}
+
 // Creates a proxy resolution service appropriate for this platform.
 std::unique_ptr<net::ProxyResolutionService> CreateProxyResolutionService(
     std::unique_ptr<net::ProxyConfigService> proxy_config_service,

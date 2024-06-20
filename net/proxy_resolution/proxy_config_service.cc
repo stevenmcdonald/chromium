@@ -11,7 +11,9 @@
 #include "base/task/sequenced_task_runner.h"
 #include "base/task/single_thread_task_runner.h"
 #include "build/build_config.h"
+#include "net/base/proxy_string_util.h"
 #include "net/proxy_resolution/proxy_config_with_annotation.h"
+#include "net/proxy_resolution/proxy_config_service_fixed.h"
 
 #if BUILDFLAG(IS_WIN)
 #include "net/proxy_resolution/win/proxy_config_service_win.h"
@@ -89,6 +91,21 @@ class ProxyConfigServiceDirect : public ProxyConfigService {
 };
 
 }  // namespace
+
+
+std::unique_ptr<ProxyConfigService>
+ProxyConfigService::CreateFixedSystemProxyConfigService(
+    const scoped_refptr<base::SequencedTaskRunner>& main_task_runner, base::StringPiece uri) {
+  ProxyConfig raw_proxy_config;
+  raw_proxy_config.proxy_rules().type = ProxyConfig::ProxyRules::Type::PROXY_LIST;
+  raw_proxy_config.proxy_rules().single_proxies.SetSingleProxyServer(ProxyUriToProxyServer(uri, ProxyServer::SCHEME_SOCKS5));
+#if (!defined(OS_WIN) && !defined(OS_LINUX)) || defined(OS_CHROMEOS)
+  ProxyConfigWithAnnotation proxy_config = ProxyConfigWithAnnotation(raw_proxy_config, NO_TRAFFIC_ANNOTATION_YET);
+#else
+  ProxyConfigWithAnnotation proxy_config = ProxyConfigWithAnnotation(raw_proxy_config, kSystemProxyConfigTrafficAnnotation);
+#endif
+  return std::make_unique<ProxyConfigServiceFixed>(proxy_config);
+}
 
 // static
 std::unique_ptr<ProxyConfigService>

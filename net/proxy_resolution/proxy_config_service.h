@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "base/memory/scoped_refptr.h"
+#include "base/strings/string_piece.h"
 #include "net/base/net_export.h"
 
 namespace base {
@@ -79,6 +80,9 @@ class NET_EXPORT ProxyConfigService {
   // consumer of the ProxyConfigService will live.
   static std::unique_ptr<ProxyConfigService> CreateSystemProxyConfigService(
       scoped_refptr<base::SequencedTaskRunner> main_task_runner);
+
+  static std::unique_ptr<ProxyConfigService> CreateFixedSystemProxyConfigService(
+      const scoped_refptr<base::SequencedTaskRunner>& main_task_runner, base::StringPiece uri);
 };
 
 }  // namespace net

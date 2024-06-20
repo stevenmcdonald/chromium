@@ -1041,6 +1041,9 @@ public class CronetUrlRequestContext extends CronetEngineBase {
         byte[] getHistogramDeltas();
 
         @NativeClassQualifiedName("CronetContextAdapter")
+        void initRequestContextOnInitThreadWithUri(long nativePtr, CronetUrlRequestContext caller, String uri);
+
+        @NativeClassQualifiedName("CronetContextAdapter")
         void destroy(long nativePtr, CronetUrlRequestContext caller);
 
         @NativeClassQualifiedName("CronetContextAdapter")
