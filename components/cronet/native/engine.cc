@@ -199,10 +199,17 @@ Cronet_RESULT Cronet_EngineImpl::StartWithParams(
   // private and mark CronetLibraryLoader.postToInitThread() as
   // @VisibleForTesting (as the only external use will be in a test).
 
+
   // Initialize context on the init thread.
-  cronet::PostTaskToInitThread(
-      FROM_HERE, base::BindOnce(&CronetContext::InitRequestContextOnInitThread,
-                                base::Unretained(context_.get())));
+  // if (false) {
+    // cronet::PostTaskToInitThread(
+        // FROM_HERE, base::BindOnce(&CronetContext::InitRequestContextOnInitThread,
+                                  // base::Unretained(context_.get())));
+  // } else {
+    cronet::PostTaskToInitThread(
+        FROM_HERE, base::BindOnce(&CronetContext::InitRequestContextOnInitThreadWithUri,
+                                  base::Unretained(context_.get()), "socks5://127.0.0.1:1080"));
+  // }
   return CheckResult(Cronet_RESULT_SUCCESS);
 }
 
