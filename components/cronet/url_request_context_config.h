@@ -127,6 +127,9 @@ struct URLRequestContextConfig {
   // User-Agent request header field.
   const std::string user_agent;
 
+  // URL of proxy server
+  const std::string proxy_url;
+
   // Certificate verifier for testing.
   std::unique_ptr<net::CertVerifier> mock_cert_verifier;
 
@@ -199,6 +202,8 @@ struct URLRequestContextConfig {
       const std::string& accept_language,
       // User-Agent request header field.
       const std::string& user_agent,
+      // URL of proxy server
+      const std::string& proxy_url,
       // JSON encoded experimental options.
       const std::string& unparsed_experimental_options,
       // MockCertVerifier to use for testing purposes.
@@ -233,6 +238,8 @@ struct URLRequestContextConfig {
       const std::string& accept_language,
       // User-Agent request header field.
       const std::string& user_agent,
+      // URL of proxy
+      const std::string& proxy_url,
       // Parsed experimental options.
       base::Value::Dict experimental_options,
       // MockCertVerifier to use for testing purposes.
@@ -301,6 +308,8 @@ struct URLRequestContextConfigBuilder {
   std::string accept_language = "";
   // User-Agent request header field.
   std::string user_agent = "";
+  // URL of proxy
+  std::string proxy_url = "";
   // Experimental options encoded as a string in a JSON format containing
   // experiments and their corresponding configuration options. The format
   // is a JSON object with the name of the experiment as the key, and the

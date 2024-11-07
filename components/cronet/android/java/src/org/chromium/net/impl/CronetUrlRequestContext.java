@@ -411,6 +411,10 @@ public class CronetUrlRequestContext extends CronetEngineBase {
             resultBuilder.setExperimentalOptions(engineBuilder.experimentalOptions());
         }
 
+        if (engineBuilder.getProxyUrl() != null) {
+            resultBuilder.setProxyUrl(engineBuilder.getProxyUrl());
+        }
+
         return resultBuilder.build();
     }
 
