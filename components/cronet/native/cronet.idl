@@ -512,6 +512,12 @@ struct EngineParams {
   string user_agent;
 
   /**
+   * A string argument to be passed into MappedHostResolver->SetRulesFromString. It can
+   * be used to create direct mappings from domains to ips that override dns lookups.
+   */
+  string resolver_rules;
+
+  /**
    * Sets a default value for the Accept-Language header value for UrlRequests
    * created by this engine. Explicitly setting the Accept-Language header
    * value for individual UrlRequests will override this value.
