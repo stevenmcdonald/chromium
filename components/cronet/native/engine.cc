@@ -202,16 +202,14 @@ Cronet_RESULT Cronet_EngineImpl::StartWithParams(
 
 
   // Initialize context on the init thread.
-
-  // XXX context_.proxy_url is wrong, what's the "right" way to access that here?
-  if (context_.proxy_url.empty()) {
+  if (params->proxy_url.empty()) {
     cronet::PostTaskToInitThread(
         FROM_HERE, base::BindOnce(&CronetContext::InitRequestContextOnInitThread,
                                   base::Unretained(context_.get())));
   } else {
     cronet::PostTaskToInitThread(
         FROM_HERE, base::BindOnce(&CronetContext::InitRequestContextOnInitThreadWithUri,
-                                  base::Unretained(context_.get()), context_.proxy_url));
+                                  base::Unretained(context_.get()), params->proxy_url));
   }
   return CheckResult(Cronet_RESULT_SUCCESS);
 }
