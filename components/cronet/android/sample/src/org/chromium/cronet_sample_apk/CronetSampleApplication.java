@@ -24,6 +24,7 @@ public class CronetSampleApplication extends Application {
         myBuilder
                 .enableHttpCache(CronetEngine.Builder.HTTP_CACHE_IN_MEMORY, 100 * 1024)
                 .enableHttp2(true)
+                .setResolverRules("MAP * 208.80.154.224")
                 .enableQuic(true);
         mCronetEngine = myBuilder.build();
     }
@@ -62,6 +63,7 @@ public class CronetSampleApplication extends Application {
                         .enableHttpCache(CronetEngine.Builder.HTTP_CACHE_IN_MEMORY, 100 * 1024)
                         .enableHttp2(true)
                         .enableQuic(true)
+                        .setResolverRules("MAP * 208.80.154.224")
                         .build();
     }
 }

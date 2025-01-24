@@ -243,6 +243,7 @@ static jlong JNI_CronetUrlRequestContext_CreateRequestContextConfig(
           configOptions.http_cache_max_size(), configOptions.disable_cache(),
           configOptions.storage_path(),
           /* accept_languages */ std::string(), configOptions.user_agent(),
+          configOptions.resolver_rules(),
           configOptions.experimental_options(),
           base::WrapUnique(reinterpret_cast<net::CertVerifier*>(
               configOptions.mock_cert_verifier())),
