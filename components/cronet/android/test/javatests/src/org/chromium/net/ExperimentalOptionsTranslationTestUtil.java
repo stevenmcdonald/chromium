@@ -186,6 +186,11 @@ public class ExperimentalOptionsTranslationTestUtil {
         }
 
         @Override
+        public ICronetEngineBuilder setProxyUrl(String value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public String getDefaultUserAgent() {
             throw new UnsupportedOperationException();
         }
