@@ -411,6 +411,18 @@ public class CronetUrlRequestContext extends CronetEngineBase {
             resultBuilder.setExperimentalOptions(engineBuilder.experimentalOptions());
         }
 
+        if (engineBuilder.disabledCipherSuites() != null) {
+            resultBuilder.setDisabledCipherSuites(engineBuilder.disabledCipherSuites());
+        }
+
+        if (engineBuilder.minSslVersion() != null) {
+            resultBuilder.setMinSslVersion(engineBuilder.minSslVersion());
+        }
+
+        if (engineBuilder.maxSslVersion() != null) {
+            resultBuilder.setMaxSslVersion(engineBuilder.maxSslVersion());
+        }
+
         return resultBuilder.build();
     }
 

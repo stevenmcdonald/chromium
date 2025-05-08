@@ -512,6 +512,13 @@ struct EngineParams {
   string user_agent;
 
   /**
+   * Additional arguments to configure the url request context.
+   */
+  string disabled_cipher_suites;
+  uint16_t min_ssl_version;
+  uint16_t max_ssl_version;
+
+  /**
    * Sets a default value for the Accept-Language header value for UrlRequests
    * created by this engine. Explicitly setting the Accept-Language header
    * value for individual UrlRequests will override this value.

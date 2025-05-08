@@ -142,6 +142,9 @@ public abstract class CronetEngineBuilderImpl extends ICronetEngineBuilder {
     private final CronetSource mSource;
     private boolean mPublicKeyPinningBypassForLocalTrustAnchorsEnabled;
     private String mUserAgent;
+    private String mDisabledCipherSuites;
+    private Short mMinSslVersion;
+    private Short mMaxSslVersion;
     private String mStoragePath;
     private boolean mQuicEnabled;
     private boolean mHttp2Enabled;
@@ -230,6 +233,36 @@ public abstract class CronetEngineBuilderImpl extends ICronetEngineBuilder {
     @VisibleForTesting
     String getUserAgent() {
         return mUserAgent;
+    }
+
+    @Override
+    public CronetEngineBuilderImpl setDisabledCipherSuites(String disabledCipherSuites) {
+        mDisabledCipherSuites = disabledCipherSuites;
+        return this;
+    }
+
+    public String getDisabledCipherSuites() {
+        return mDisabledCipherSuites;
+    }
+
+    @Override
+    public CronetEngineBuilderImpl setMinSslVersion(Short minSslVersion) {
+        mMinSslVersion = minSslVersion;
+        return this;
+    }
+
+    public Short getMinSslVersion() {
+        return mMinSslVersion;
+    }
+
+    @Override
+    public CronetEngineBuilderImpl setMaxSslVersion(Short maxSslVersion) {
+        mMaxSslVersion = maxSslVersion;
+        return this;
+    }
+
+    public Short getMaxSslVersion() {
+        return mMaxSslVersion;
     }
 
     @Override

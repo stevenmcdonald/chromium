@@ -269,8 +269,8 @@ URLRequestContextConfig::URLRequestContextConfig(
     const std::string& accept_language,
     const std::string& user_agent,
     const std::string& disabled_cipher_suites,
-    const uint16_t ssl_version_min,
-    const uint16_t ssl_version_max,
+    const uint16_t min_ssl_version,
+    const uint16_t max_ssl_version,
     base::Value::Dict experimental_options,
     std::unique_ptr<net::CertVerifier> mock_cert_verifier,
     bool enable_network_quality_estimator,
@@ -286,8 +286,8 @@ URLRequestContextConfig::URLRequestContextConfig(
       accept_language(accept_language),
       user_agent(user_agent),
       disabled_cipher_suites(disabled_cipher_suites),
-      ssl_version_min(ssl_version_min),
-      ssl_version_max(ssl_version_max),
+      min_ssl_version(min_ssl_version),
+      max_ssl_version(max_ssl_version),
       mock_cert_verifier(std::move(mock_cert_verifier)),
       enable_network_quality_estimator(enable_network_quality_estimator),
       bypass_public_key_pinning_for_local_trust_anchors(
@@ -315,8 +315,8 @@ URLRequestContextConfig::CreateURLRequestContextConfig(
     const std::string& accept_language,
     const std::string& user_agent,
     const std::string& disabled_cipher_suites,
-    const uint16_t ssl_version_min,
-    const uint16_t ssl_version_max,
+    const uint16_t min_ssl_version,
+    const uint16_t max_ssl_version,
     const std::string& unparsed_experimental_options,
     std::unique_ptr<net::CertVerifier> mock_cert_verifier,
     bool enable_network_quality_estimator,
@@ -335,7 +335,7 @@ URLRequestContextConfig::CreateURLRequestContextConfig(
   return base::WrapUnique(new URLRequestContextConfig(
       enable_quic, enable_spdy, enable_brotli, http_cache, http_cache_max_size,
       load_disable_cache, storage_path, accept_language, user_agent,
-      disabled_cipher_suites, ssl_version_min, ssl_version_max,
+      disabled_cipher_suites, min_ssl_version, max_ssl_version,
       std::move(experimental_options).value(), std::move(mock_cert_verifier),
       enable_network_quality_estimator,
       bypass_public_key_pinning_for_local_trust_anchors,
@@ -816,9 +816,6 @@ void URLRequestContextConfig::ConfigureURLRequestContextBuilder(
 
   net::SSLContextConfig ssl_context_config;
 
-  // TEMP: replace local parameter with this string for testing
-  //   first 2 values should be parsed, 3rd should fail
-  // std::string disabled_cipher_string = "0xc024,0xc02f,0002";
   if (!disabled_cipher_suites.empty()) {
     std::cerr << "TEMP - got cipher suite string: " << disabled_cipher_suites << std::endl;
     auto cipher_strings = base::SplitString(disabled_cipher_suites, ",", base::TRIM_WHITESPACE, base::SPLIT_WANT_ALL);
@@ -843,19 +840,15 @@ void URLRequestContextConfig::ConfigureURLRequestContextBuilder(
     std::cerr << "TEMP - no cipher suite string." << std::endl;
   }
 
-  // TEMP: replace local parameters with these strings for testing
-  //   min > max means all versions rejected, should result in error
-  // uint16_t min = net::SSL_PROTOCOL_VERSION_TLS1_3;
-  // uint16_t max = net::SSL_PROTOCOL_VERSION_TLS1_2;
-  if (ssl_version_min != net::kDefaultSSLVersionMin) {
+  if (min_ssl_version != net::kDefaultSSLVersionMin) {
     std::cerr << "TEMP - set min value" << std::endl;
-    ssl_context_config.version_min = ssl_version_min;
+    ssl_context_config.version_min = min_ssl_version;
   } else {
     std::cerr << "TEMP - keep default min value" << std::endl;
   }
-  if (ssl_version_max != net::kDefaultSSLVersionMax) {
+  if (max_ssl_version != net::kDefaultSSLVersionMax) {
     std::cerr << "TEMP - set max value" << std::endl;
-    ssl_context_config.version_max = ssl_version_max;
+    ssl_context_config.version_max = max_ssl_version;
   } else {
     std::cerr << "TEMP - keep default max value" << std::endl;
   }
@@ -893,7 +886,7 @@ URLRequestContextConfigBuilder::Build() {
   return URLRequestContextConfig::CreateURLRequestContextConfig(
       enable_quic, enable_spdy, enable_brotli, http_cache, http_cache_max_size,
       load_disable_cache, storage_path, accept_language, user_agent,
-      disabled_cipher_suites, ssl_version_min, ssl_version_max,
+      disabled_cipher_suites, min_ssl_version, max_ssl_version,
       experimental_options, std::move(mock_cert_verifier),
       enable_network_quality_estimator,
       bypass_public_key_pinning_for_local_trust_anchors,
