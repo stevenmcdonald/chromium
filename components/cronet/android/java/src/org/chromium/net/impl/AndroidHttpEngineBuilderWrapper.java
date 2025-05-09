@@ -50,10 +50,10 @@ class AndroidHttpEngineBuilderWrapper extends ICronetEngineBuilder {
     }
 
     @Override
-    public ICronetEngineBuilder setDisabledCipherSuite(String disabledCipherSuites) {
+    public ICronetEngineBuilder setDisabledCipherSuites(String disabledCipherSuites) {
         // need to implement abstract method, but mBackend 
         // class has not been updated with new parameters
-        // mBackend.setDisabledCipherSuite(disabledCipherSuites);
+        // mBackend.setDisabledCipherSuites(disabledCipherSuites);
         return this;
     }
 

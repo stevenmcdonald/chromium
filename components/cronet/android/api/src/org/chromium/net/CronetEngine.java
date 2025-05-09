@@ -138,8 +138,8 @@ public abstract class CronetEngine {
         /**
          * Additional arguments to configure the url request context.
          */
-        public Builder setDisabledCipherSuite(String disabledCipherSuites) {
-            mBuilderDelegate.setDisabledCipherSuite(disabledCipherSuites);
+        public Builder setDisabledCipherSuites(String disabledCipherSuites) {
+            mBuilderDelegate.setDisabledCipherSuites(disabledCipherSuites);
             return this;
         }
 

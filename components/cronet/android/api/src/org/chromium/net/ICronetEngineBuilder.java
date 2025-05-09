@@ -75,7 +75,7 @@ public abstract class ICronetEngineBuilder {
 
     public abstract ICronetEngineBuilder setUserAgent(String userAgent);
 
-    public abstract ICronetEngineBuilder setDisabledCipherSuite(String disabledSuites);
+    public abstract ICronetEngineBuilder setDisabledCipherSuites(String disabledSuites);
 
     public abstract ICronetEngineBuilder setMinSslVersion(Short minVersion);
 
