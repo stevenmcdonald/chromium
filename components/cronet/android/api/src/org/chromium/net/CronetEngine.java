@@ -136,6 +136,24 @@ public abstract class CronetEngine {
         protected final ICronetEngineBuilder mBuilderDelegate;
 
         /**
+         * Additional arguments to configure the url request context.
+         */
+        public Builder setDisabledCipherSuites(String disabledCipherSuites) {
+            mBuilderDelegate.setDisabledCipherSuites(disabledCipherSuites);
+            return this;
+        }
+
+        public Builder setMinSslVersion(Short minSslVersion) {
+            mBuilderDelegate.setMinSslVersion(minSslVersion);
+            return this;
+        }
+
+        public Builder setMaxSslVersion(Short maxSslVersion) {
+            mBuilderDelegate.setMaxSslVersion(maxSslVersion);
+            return this;
+        }
+
+        /**
          * Constructs a {@link Builder} object that facilitates creating a {@link CronetEngine}. The
          * default configuration enables HTTP/2 and QUIC, but disables the HTTP cache.
          *

@@ -21,4 +21,7 @@ message RequestContextConfigOptions {
   optional bool enable_network_quality_estimator = 12;
   optional bool bypass_public_key_pinning_for_local_trust_anchors = 13;
   optional int32 network_thread_priority = 14;
+  optional string disabled_cipher_suites = 100;
+  optional int32 min_ssl_version = 101;
+  optional int32 max_ssl_version = 102;
 }

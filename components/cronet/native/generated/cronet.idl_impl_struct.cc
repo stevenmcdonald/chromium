@@ -249,6 +249,24 @@ void Cronet_EngineParams_user_agent_set(Cronet_EngineParamsPtr self,
   self->user_agent = user_agent;
 }
 
+void Cronet_EngineParams_disabled_cipher_suites_set(Cronet_EngineParamsPtr self,
+                                        const Cronet_String disabled_cipher_suites) {
+  DCHECK(self);
+  self->disabled_cipher_suites = disabled_cipher_suites;
+}
+
+void Cronet_EngineParams_min_ssl_version_set(Cronet_EngineParamsPtr self,
+                                        const uint16_t min_ssl_version) {
+  DCHECK(self);
+  self->min_ssl_version = min_ssl_version;
+}
+
+void Cronet_EngineParams_max_ssl_version_set(Cronet_EngineParamsPtr self,
+                                        const uint16_t max_ssl_version) {
+  DCHECK(self);
+  self->max_ssl_version = max_ssl_version;
+}
+
 void Cronet_EngineParams_accept_language_set(
     Cronet_EngineParamsPtr self,
     const Cronet_String accept_language) {
@@ -340,6 +358,24 @@ Cronet_String Cronet_EngineParams_user_agent_get(
     const Cronet_EngineParamsPtr self) {
   DCHECK(self);
   return self->user_agent.c_str();
+}
+
+Cronet_String Cronet_EngineParams_disabled_cipher_suites_get(
+    const Cronet_EngineParamsPtr self) {
+  DCHECK(self);
+  return self->disabled_cipher_suites.c_str();
+}
+
+uint16_t Cronet_EngineParams_min_ssl_version_get(
+    const Cronet_EngineParamsPtr self) {
+  DCHECK(self);
+  return self->min_ssl_version;
+}
+
+uint16_t Cronet_EngineParams_max_ssl_version_get(
+    const Cronet_EngineParamsPtr self) {
+  DCHECK(self);
+  return self->max_ssl_version;
 }
 
 Cronet_String Cronet_EngineParams_accept_language_get(

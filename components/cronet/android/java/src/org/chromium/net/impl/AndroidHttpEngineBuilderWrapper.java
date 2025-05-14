@@ -50,6 +50,30 @@ class AndroidHttpEngineBuilderWrapper extends ICronetEngineBuilder {
     }
 
     @Override
+    public ICronetEngineBuilder setDisabledCipherSuites(String disabledCipherSuites) {
+        // need to implement abstract method, but mBackend 
+        // class has not been updated with new parameters
+        // mBackend.setDisabledCipherSuites(disabledCipherSuites);
+        return this;
+    }
+
+    @Override
+    public ICronetEngineBuilder setMinSslVersion(Short minSslVersion) {
+        // need to implement abstract method, but mBackend 
+        // class has not been updated with new parameters
+        // mBackend.setMinSslVersion(minSslVersion);
+        return this;
+    }
+
+    @Override
+    public ICronetEngineBuilder setMaxSslVersion(Short maxSslVersion) {
+        // need to implement abstract method, but mBackend 
+        // class has not been updated with new parameters
+        // mBackend.setMaxSslVersion(maxSslVersion);
+        return this;
+    }
+
+    @Override
     public ICronetEngineBuilder setStoragePath(String value) {
         mBackend.setStoragePath(value);
         return this;

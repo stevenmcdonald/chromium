@@ -191,6 +191,21 @@ public class ExperimentalOptionsTranslationTestUtil {
         }
 
         @Override
+        public ICronetEngineBuilder setDisabledCipherSuites(String disabledSuites) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public ICronetEngineBuilder setMinSslVersion(Short minVersion) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public ICronetEngineBuilder setMaxSslVersion(Short maxVersion) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public ICronetEngineBuilder setConnectionMigrationOptions(
                 ConnectionMigrationOptions options) {
             mConnectionMigrationOptions = options;

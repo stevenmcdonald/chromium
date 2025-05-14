@@ -82,6 +82,9 @@ struct Cronet_EngineParams {
 
   bool enable_check_result = true;
   std::string user_agent;
+  std::string disabled_cipher_suites;
+  uint16_t min_ssl_version;
+  uint16_t max_ssl_version;
   std::string accept_language;
   std::string storage_path;
   bool enable_quic = true;
