@@ -127,6 +127,10 @@ void URLRequestContextBuilder::set_user_agent(const std::string& user_agent) {
   user_agent_ = user_agent;
 }
 
+void URLRequestContextBuilder::set_proxy_url(const std::string& proxy_url) {
+  proxy_url_ = proxy_url;
+}
+
 void URLRequestContextBuilder::set_http_user_agent_settings(
     std::unique_ptr<HttpUserAgentSettings> http_user_agent_settings) {
   http_user_agent_settings_ = std::move(http_user_agent_settings);

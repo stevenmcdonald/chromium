@@ -8,6 +8,7 @@
 
 #include "base/at_exit.h"
 #include "base/feature_list.h"
+#include "base/strings/string_piece.h"
 #include "base/task/sequenced_task_runner.h"
 #include "base/task/single_thread_task_runner.h"
 #include "base/task/thread_pool.h"
@@ -60,6 +61,12 @@ bool OnInitThread() {
 void PostTaskToInitThread(const base::Location& posted_from,
                           base::OnceClosure task) {
   InitTaskRunner()->PostTask(posted_from, std::move(task));
+}
+
+std::unique_ptr<net::ProxyConfigService> CreateFixedProxyConfigService(
+    const scoped_refptr<base::SequencedTaskRunner>& io_task_runner, base::StringPiece uri) {
+  return net::ProxyConfigService::CreateFixedSystemProxyConfigService(
+      io_task_runner, uri);
 }
 
 std::unique_ptr<net::ProxyConfigService> CreateProxyConfigService(

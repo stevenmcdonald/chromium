@@ -213,6 +213,14 @@ std::unique_ptr<net::ProxyConfigService> CreateProxyConfigService(
   return service;
 }
 
+std::unique_ptr<net::ProxyConfigService> CreateFixedProxyConfigService(
+    const scoped_refptr<base::SequencedTaskRunner>& io_task_runner, base::StringPiece uri) {
+  std::unique_ptr<net::ProxyConfigService> service =
+      net::ProxyConfigService::CreateFixedSystemProxyConfigService(
+          io_task_runner, uri);
+  return service;
+}
+
 // Creates a proxy resolution service appropriate for this platform.
 std::unique_ptr<net::ProxyResolutionService> CreateProxyResolutionService(
     std::unique_ptr<net::ProxyConfigService> proxy_config_service,

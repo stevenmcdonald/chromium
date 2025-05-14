@@ -298,10 +298,18 @@ public class CronetUrlRequestContext extends CronetEngineBase {
                             // mUrlRequestContextAdapter is guaranteed to exist until
                             // initialization on init and network threads completes and
                             // initNetworkThread is called back on network thread.
-                            CronetUrlRequestContextJni.get()
+                            if (builder.getProxyUrl() != null && builder.getProxyUrl().startsWith("socks5://")) {
+                                CronetUrlRequestContextJni.get()
+                                    .initRequestContextOnInitThreadWithUri(
+				                        mUrlRequestContextAdapter,
+                                        CronetUrlRequestContext.this,
+                                        builder.getProxyUrl());
+		                    } else {
+                                CronetUrlRequestContextJni.get()
                                     .initRequestContextOnInitThread(
-                                            mUrlRequestContextAdapter,
-                                            CronetUrlRequestContext.this);
+                                        mUrlRequestContextAdapter,
+                                        CronetUrlRequestContext.this);
+		                    }
                         }
 
                         if (cronetInitializedInfoLogger != null) {
@@ -409,6 +417,10 @@ public class CronetUrlRequestContext extends CronetEngineBase {
 
         if (engineBuilder.experimentalOptions() != null) {
             resultBuilder.setExperimentalOptions(engineBuilder.experimentalOptions());
+        }
+
+        if (engineBuilder.getProxyUrl() != null) {
+            resultBuilder.setProxyUrl(engineBuilder.getProxyUrl());
         }
 
         return resultBuilder.build();
@@ -1039,6 +1051,9 @@ public class CronetUrlRequestContext extends CronetEngineBase {
         long createRequestContextAdapter(long urlRequestContextConfig);
 
         byte[] getHistogramDeltas();
+
+        @NativeClassQualifiedName("CronetContextAdapter")
+        void initRequestContextOnInitThreadWithUri(long nativePtr, CronetUrlRequestContext caller, String uri);
 
         @NativeClassQualifiedName("CronetContextAdapter")
         void destroy(long nativePtr, CronetUrlRequestContext caller);

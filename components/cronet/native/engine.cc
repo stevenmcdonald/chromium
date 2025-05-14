@@ -149,6 +149,7 @@ Cronet_RESULT Cronet_EngineImpl::StartWithParams(
   context_config_builder.storage_path = params->storage_path;
   context_config_builder.accept_language = params->accept_language;
   context_config_builder.user_agent = params->user_agent;
+  context_config_builder.proxy_url = params->proxy_url;
   context_config_builder.experimental_options = params->experimental_options;
   context_config_builder.bypass_public_key_pinning_for_local_trust_anchors =
       params->enable_public_key_pinning_bypass_for_local_trust_anchors;
@@ -199,10 +200,17 @@ Cronet_RESULT Cronet_EngineImpl::StartWithParams(
   // private and mark CronetLibraryLoader.postToInitThread() as
   // @VisibleForTesting (as the only external use will be in a test).
 
+
   // Initialize context on the init thread.
-  cronet::PostTaskToInitThread(
-      FROM_HERE, base::BindOnce(&CronetContext::InitRequestContextOnInitThread,
-                                base::Unretained(context_.get())));
+  if (params->proxy_url.empty()) {
+    cronet::PostTaskToInitThread(
+        FROM_HERE, base::BindOnce(&CronetContext::InitRequestContextOnInitThread,
+                                  base::Unretained(context_.get())));
+  } else {
+    cronet::PostTaskToInitThread(
+        FROM_HERE, base::BindOnce(&CronetContext::InitRequestContextOnInitThreadWithUri,
+                                  base::Unretained(context_.get()), params->proxy_url));
+  }
   return CheckResult(Cronet_RESULT_SUCCESS);
 }
 

@@ -233,6 +233,9 @@ class NET_EXPORT URLRequestContext final {
   // context has been bound to.
   handles::NetworkHandle bound_network() const { return bound_network_; }
 
+  void set_proxy_url(const std::string& proxy_url) { proxy_url_ = proxy_url; }
+  const std::string& proxy_url() const { return proxy_url_; }
+
   void AssertCalledOnValidThread() {
     DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);
   }
@@ -378,6 +381,8 @@ class NET_EXPORT URLRequestContext final {
   // Triggers a DCHECK if a NetworkAnonymizationKey/IsolationInfo is not
   // provided to a request when true.
   bool require_network_anonymization_key_ = false;
+
+  std::string proxy_url_;
 
   std::optional<std::string> cookie_deprecation_label_;
 

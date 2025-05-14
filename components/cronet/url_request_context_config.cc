@@ -265,6 +265,7 @@ URLRequestContextConfig::URLRequestContextConfig(
     const std::string& storage_path,
     const std::string& accept_language,
     const std::string& user_agent,
+    const std::string& proxy_url,
     base::Value::Dict experimental_options,
     std::unique_ptr<net::CertVerifier> mock_cert_verifier,
     bool enable_network_quality_estimator,
@@ -279,6 +280,7 @@ URLRequestContextConfig::URLRequestContextConfig(
       storage_path(storage_path),
       accept_language(accept_language),
       user_agent(user_agent),
+      proxy_url(proxy_url),
       mock_cert_verifier(std::move(mock_cert_verifier)),
       enable_network_quality_estimator(enable_network_quality_estimator),
       bypass_public_key_pinning_for_local_trust_anchors(
@@ -305,6 +307,7 @@ URLRequestContextConfig::CreateURLRequestContextConfig(
     const std::string& storage_path,
     const std::string& accept_language,
     const std::string& user_agent,
+    const std::string& proxy_url,
     const std::string& unparsed_experimental_options,
     std::unique_ptr<net::CertVerifier> mock_cert_verifier,
     bool enable_network_quality_estimator,
@@ -322,7 +325,7 @@ URLRequestContextConfig::CreateURLRequestContextConfig(
   }
   return base::WrapUnique(new URLRequestContextConfig(
       enable_quic, enable_spdy, enable_brotli, http_cache, http_cache_max_size,
-      load_disable_cache, storage_path, accept_language, user_agent,
+      load_disable_cache, storage_path, accept_language, user_agent, proxy_url,
       std::move(experimental_options).value(), std::move(mock_cert_verifier),
       enable_network_quality_estimator,
       bypass_public_key_pinning_for_local_trust_anchors,
@@ -800,6 +803,7 @@ void URLRequestContextConfig::ConfigureURLRequestContextBuilder(
   }
   context_builder->set_accept_language(accept_language);
   context_builder->set_user_agent(user_agent);
+  context_builder->set_proxy_url(proxy_url);
   net::HttpNetworkSessionParams session_params;
   session_params.enable_http2 = enable_spdy;
   session_params.enable_quic = enable_quic;
@@ -829,7 +833,7 @@ std::unique_ptr<URLRequestContextConfig>
 URLRequestContextConfigBuilder::Build() {
   return URLRequestContextConfig::CreateURLRequestContextConfig(
       enable_quic, enable_spdy, enable_brotli, http_cache, http_cache_max_size,
-      load_disable_cache, storage_path, accept_language, user_agent,
+      load_disable_cache, storage_path, accept_language, user_agent, proxy_url,
       experimental_options, std::move(mock_cert_verifier),
       enable_network_quality_estimator,
       bypass_public_key_pinning_for_local_trust_anchors,

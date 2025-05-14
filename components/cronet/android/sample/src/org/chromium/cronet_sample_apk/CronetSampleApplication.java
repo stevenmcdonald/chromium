@@ -24,6 +24,7 @@ public class CronetSampleApplication extends Application {
         myBuilder
                 .enableHttpCache(CronetEngine.Builder.HTTP_CACHE_IN_MEMORY, 100 * 1024)
                 .enableHttp2(true)
+                .setProxyUrl("socks5://127.0.0.1:1080")
                 .enableQuic(true);
         mCronetEngine = myBuilder.build();
     }
@@ -62,6 +63,7 @@ public class CronetSampleApplication extends Application {
                         .enableHttpCache(CronetEngine.Builder.HTTP_CACHE_IN_MEMORY, 100 * 1024)
                         .enableHttp2(true)
                         .enableQuic(true)
+                        .setProxyUrl("socks5://127.0.0.1:1080")
                         .build();
     }
 }

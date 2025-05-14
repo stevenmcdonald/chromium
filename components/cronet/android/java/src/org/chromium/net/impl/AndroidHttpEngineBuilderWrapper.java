@@ -50,6 +50,13 @@ class AndroidHttpEngineBuilderWrapper extends ICronetEngineBuilder {
     }
 
     @Override
+    public ICronetEngineBuilder setProxyUrl(String proxyUrl) {
+        // HttpEngine.Builder doesn't have this method
+        // mBackend.setProxyUrl(proxyUrl);
+        return this;
+    }
+
+    @Override
     public ICronetEngineBuilder setStoragePath(String value) {
         mBackend.setStoragePath(value);
         return this;
