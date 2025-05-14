@@ -798,6 +798,9 @@ CRONET_EXPORT
 void Cronet_EngineParams_proxy_url_set(Cronet_EngineParamsPtr self,
                                         const Cronet_String proxy_url);
 CRONET_EXPORT
+void Cronet_EngineParams_resolver_rules_set(Cronet_EngineParamsPtr self,
+                                        const Cronet_String resolver_rules);
+CRONET_EXPORT
 void Cronet_EngineParams_accept_language_set(
     Cronet_EngineParamsPtr self,
     const Cronet_String accept_language);
@@ -849,6 +852,9 @@ Cronet_String Cronet_EngineParams_user_agent_get(
     const Cronet_EngineParamsPtr self);
 CRONET_EXPORT
 Cronet_String Cronet_EngineParams_proxy_url_get(
+    const Cronet_EngineParamsPtr self);
+CRONET_EXPORT
+Cronet_String Cronet_EngineParams_resolver_rules_get(
     const Cronet_EngineParamsPtr self);
 CRONET_EXPORT
 Cronet_String Cronet_EngineParams_accept_language_get(

@@ -143,6 +143,7 @@ public abstract class CronetEngineBuilderImpl extends ICronetEngineBuilder {
     private boolean mPublicKeyPinningBypassForLocalTrustAnchorsEnabled;
     private String mUserAgent;
     private String mProxyUrl;
+    private String mResolverRules;
     private String mStoragePath;
     private boolean mQuicEnabled;
     private boolean mHttp2Enabled;
@@ -241,6 +242,16 @@ public abstract class CronetEngineBuilderImpl extends ICronetEngineBuilder {
 
     public String getProxyUrl() {
         return mProxyUrl;
+    }
+
+    @Override
+    public CronetEngineBuilderImpl setResolverRules(String resolverRules) {
+        mResolverRules = resolverRules;
+        return this;
+    }
+
+    public String getResolverRules() {
+        return mResolverRules;
     }
 
     @Override

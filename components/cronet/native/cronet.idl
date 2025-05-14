@@ -512,6 +512,12 @@ struct EngineParams {
   string user_agent;
 
   /**
+   * A string argument to be passed into MappedHostResolver->SetRulesFromString. It can
+   * be used to create direct mappings from domains to ips that override dns lookups.
+   */
+  string resolver_rules;
+
+  /**
    *
    *
    */

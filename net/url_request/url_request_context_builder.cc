@@ -31,6 +31,7 @@
 #include "net/dns/context_host_resolver.h"
 #include "net/dns/host_resolver.h"
 #include "net/dns/host_resolver_manager.h"
+#include "net/dns/mapped_host_resolver.h"
 #include "net/http/http_auth_handler_factory.h"
 #include "net/http/http_cache.h"
 #include "net/http/http_network_layer.h"
@@ -129,6 +130,10 @@ void URLRequestContextBuilder::set_user_agent(const std::string& user_agent) {
 
 void URLRequestContextBuilder::set_proxy_url(const std::string& proxy_url) {
   proxy_url_ = proxy_url;
+}
+
+void URLRequestContextBuilder::set_resolver_rules(const std::string& resolver_rules) {
+  resolver_rules_ = resolver_rules;
 }
 
 void URLRequestContextBuilder::set_http_user_agent_settings(
@@ -375,7 +380,17 @@ std::unique_ptr<URLRequestContext> URLRequestContextBuilder::Build() {
     }
   }
   host_resolver_->SetRequestContext(context.get());
-  context->set_host_resolver(std::move(host_resolver_));
+
+  if (resolver_rules_.empty()) {
+    // if no resolver rules are found, continue as usual
+    context->set_host_resolver(std::move(host_resolver_));
+  } else {
+    // else, set MappedHostResolver parameter to override dns mapping
+    std::unique_ptr<net::MappedHostResolver> remapped_resolver(
+        new net::MappedHostResolver(std::move(host_resolver_)));
+    remapped_resolver->SetRulesFromString(resolver_rules_);
+    context->set_host_resolver(std::move(remapped_resolver));
+  }
 
   if (ssl_config_service_) {
     context->set_ssl_config_service(std::move(ssl_config_service_));

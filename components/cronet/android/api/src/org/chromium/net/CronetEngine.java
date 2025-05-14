@@ -136,6 +136,15 @@ public abstract class CronetEngine {
         protected final ICronetEngineBuilder mBuilderDelegate;
 
         /**
+         * A string argument to be passed into MappedHostResolver->SetRulesFromString. It can
+         * be used to create direct mappings from domains to ips that override dns lookups.
+         */
+        public Builder setResolverRules(String resolverRules) {
+            mBuilderDelegate.setResolverRules(resolverRules);
+            return this;
+        }
+
+        /**
          *
          *
          */

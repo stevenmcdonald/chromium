@@ -254,6 +254,7 @@ static jlong JNI_CronetUrlRequestContext_CreateRequestContextConfig(
           configOptions.storage_path(),
           /* accept_languages */ std::string(), configOptions.user_agent(),
           configOptions.proxy_url(),
+          configOptions.resolver_rules(),
           configOptions.experimental_options(),
           base::WrapUnique(reinterpret_cast<net::CertVerifier*>(
               configOptions.mock_cert_verifier())),

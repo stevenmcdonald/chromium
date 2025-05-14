@@ -236,6 +236,9 @@ class NET_EXPORT URLRequestContext final {
   void set_proxy_url(const std::string& proxy_url) { proxy_url_ = proxy_url; }
   const std::string& proxy_url() const { return proxy_url_; }
 
+  void set_resolver_rules(const std::string& resolver_rules) { resolver_rules_ = resolver_rules; }
+  const std::string& resolver_rules() const { return resolver_rules_; }
+
   void AssertCalledOnValidThread() {
     DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);
   }
@@ -383,6 +386,8 @@ class NET_EXPORT URLRequestContext final {
   bool require_network_anonymization_key_ = false;
 
   std::string proxy_url_;
+
+  std::string resolver_rules_;
 
   std::optional<std::string> cookie_deprecation_label_;
 

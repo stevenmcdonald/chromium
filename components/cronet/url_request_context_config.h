@@ -130,6 +130,9 @@ struct URLRequestContextConfig {
   // URL of proxy server
   const std::string proxy_url;
 
+  // MappedHostResolver->SetRulesFromString argument
+  const std::string resolver_rules;
+
   // Certificate verifier for testing.
   std::unique_ptr<net::CertVerifier> mock_cert_verifier;
 
@@ -204,6 +207,8 @@ struct URLRequestContextConfig {
       const std::string& user_agent,
       // URL of proxy server
       const std::string& proxy_url,
+      // MappedHostResolver->SetRulesFromString argument
+      const std::string& resolver_rules,
       // JSON encoded experimental options.
       const std::string& unparsed_experimental_options,
       // MockCertVerifier to use for testing purposes.
@@ -240,6 +245,8 @@ struct URLRequestContextConfig {
       const std::string& user_agent,
       // URL of proxy
       const std::string& proxy_url,
+      // MappedHostResolver->SetRulesFromString argument
+      const std::string& resolver_rules,
       // Parsed experimental options.
       base::Value::Dict experimental_options,
       // MockCertVerifier to use for testing purposes.
@@ -310,6 +317,8 @@ struct URLRequestContextConfigBuilder {
   std::string user_agent = "";
   // URL of proxy
   std::string proxy_url = "";
+  // MappedHostResolver->SetRulesFromString argument
+  std::string resolver_rules = "";
   // Experimental options encoded as a string in a JSON format containing
   // experiments and their corresponding configuration options. The format
   // is a JSON object with the name of the experiment as the key, and the

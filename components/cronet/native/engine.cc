@@ -150,6 +150,7 @@ Cronet_RESULT Cronet_EngineImpl::StartWithParams(
   context_config_builder.accept_language = params->accept_language;
   context_config_builder.user_agent = params->user_agent;
   context_config_builder.proxy_url = params->proxy_url;
+  context_config_builder.resolver_rules = params->resolver_rules;
   context_config_builder.experimental_options = params->experimental_options;
   context_config_builder.bypass_public_key_pinning_for_local_trust_anchors =
       params->enable_public_key_pinning_bypass_for_local_trust_anchors;

@@ -77,6 +77,8 @@ public abstract class ICronetEngineBuilder {
 
     public abstract ICronetEngineBuilder setProxyUrl(String proxy_url);
 
+    public abstract ICronetEngineBuilder setResolverRules(String resolverRules);
+
     public abstract String getDefaultUserAgent();
 
     public abstract ExperimentalCronetEngine build();
