@@ -144,6 +144,9 @@ public abstract class CronetEngineBuilderImpl extends ICronetEngineBuilder {
     private String mUserAgent;
     private String mProxyUrl;
     private String mResolverRules;
+    private String mDisabledCipherSuites;
+    private Short mMinSslVersion;
+    private Short mMaxSslVersion;
     private String mStoragePath;
     private boolean mQuicEnabled;
     private boolean mHttp2Enabled;
@@ -252,6 +255,36 @@ public abstract class CronetEngineBuilderImpl extends ICronetEngineBuilder {
 
     public String getResolverRules() {
         return mResolverRules;
+    }
+
+    @Override
+    public CronetEngineBuilderImpl setDisabledCipherSuites(String disabledCipherSuites) {
+        mDisabledCipherSuites = disabledCipherSuites;
+        return this;
+    }
+
+    public String getDisabledCipherSuites() {
+        return mDisabledCipherSuites;
+    }
+
+    @Override
+    public CronetEngineBuilderImpl setMinSslVersion(Short minSslVersion) {
+        mMinSslVersion = minSslVersion;
+        return this;
+    }
+
+    public Short getMinSslVersion() {
+        return mMinSslVersion;
+    }
+
+    @Override
+    public CronetEngineBuilderImpl setMaxSslVersion(Short maxSslVersion) {
+        mMaxSslVersion = maxSslVersion;
+        return this;
+    }
+
+    public Short getMaxSslVersion() {
+        return mMaxSslVersion;
     }
 
     @Override

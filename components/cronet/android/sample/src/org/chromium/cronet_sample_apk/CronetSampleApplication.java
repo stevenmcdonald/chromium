@@ -26,6 +26,9 @@ public class CronetSampleApplication extends Application {
                 .enableHttp2(true)
                 .setProxyUrl("socks5://127.0.0.1:1080")
                 .setResolverRules("MAP * 208.80.154.224")
+                .setDisabledCipherSuites("0xc024,0xc02f,0002")
+                .setMinSslVersion((short)0x0303) // net::SSL_PROTOCOL_VERSION_TLS1_2
+                .setMaxSslVersion((short)0x0304) // net::SSL_PROTOCOL_VERSION_TLS1_3
                 .enableQuic(true);
         mCronetEngine = myBuilder.build();
     }
@@ -63,6 +66,9 @@ public class CronetSampleApplication extends Application {
                         .setDnsOptions(dnsOptionsBuilder)
                         .enableHttpCache(CronetEngine.Builder.HTTP_CACHE_IN_MEMORY, 100 * 1024)
                         .enableHttp2(true)
+                        .setDisabledCipherSuites("0xc024,0xc02f,0002")
+                        .setMinSslVersion((short)771) // net::SSL_PROTOCOL_VERSION_TLS1_2 -> hex value 0x0303
+                        .setMaxSslVersion((short)772) // net::SSL_PROTOCOL_VERSION_TLS1_3 -> hex value 0x0304
                         .enableQuic(true)
                         .setProxyUrl("socks5://127.0.0.1:1080")
                         .setResolverRules("MAP * 208.80.154.224")

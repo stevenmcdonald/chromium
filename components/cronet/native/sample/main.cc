@@ -14,6 +14,9 @@ Cronet_EnginePtr CreateCronetEngine() {
   Cronet_EngineParams_user_agent_set(engine_params, "CronetSample/1");
   Cronet_EngineParams_proxy_url_set(engine_params, "socks5://127.0.0.1:1080");
   Cronet_EngineParams_resolver_rules_set(engine_params, "MAP * 208.80.154.224");
+  Cronet_EngineParams_disabled_cipher_suites_set(engine_params, "0xc024,0xc02f,0002");
+  Cronet_EngineParams_min_ssl_version_set(engine_params, 0x0303); // TLS 1.2
+  Cronet_EngineParams_max_ssl_version_set(engine_params, 0x0304); // TLS 1.3
   Cronet_EngineParams_enable_quic_set(engine_params, true);
 
   Cronet_Engine_StartWithParams(cronet_engine, engine_params);

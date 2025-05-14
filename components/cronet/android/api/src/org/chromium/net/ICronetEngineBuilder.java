@@ -79,6 +79,12 @@ public abstract class ICronetEngineBuilder {
 
     public abstract ICronetEngineBuilder setResolverRules(String resolverRules);
 
+    public abstract ICronetEngineBuilder setDisabledCipherSuites(String disabledSuites);
+
+    public abstract ICronetEngineBuilder setMinSslVersion(Short minVersion);
+
+    public abstract ICronetEngineBuilder setMaxSslVersion(Short maxVersion);
+
     public abstract String getDefaultUserAgent();
 
     public abstract ExperimentalCronetEngine build();

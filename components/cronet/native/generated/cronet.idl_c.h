@@ -801,6 +801,15 @@ CRONET_EXPORT
 void Cronet_EngineParams_resolver_rules_set(Cronet_EngineParamsPtr self,
                                         const Cronet_String resolver_rules);
 CRONET_EXPORT
+void Cronet_EngineParams_disabled_cipher_suites_set(Cronet_EngineParamsPtr self,
+                                        const Cronet_String disabled_cipher_suites);
+CRONET_EXPORT
+void Cronet_EngineParams_min_ssl_version_set(Cronet_EngineParamsPtr self,
+                                        const uint16_t min_ssl_version);
+CRONET_EXPORT
+void Cronet_EngineParams_max_ssl_version_set(Cronet_EngineParamsPtr self,
+                                        const uint16_t max_ssl_version);
+CRONET_EXPORT
 void Cronet_EngineParams_accept_language_set(
     Cronet_EngineParamsPtr self,
     const Cronet_String accept_language);
@@ -855,6 +864,15 @@ Cronet_String Cronet_EngineParams_proxy_url_get(
     const Cronet_EngineParamsPtr self);
 CRONET_EXPORT
 Cronet_String Cronet_EngineParams_resolver_rules_get(
+    const Cronet_EngineParamsPtr self);
+CRONET_EXPORT
+Cronet_String Cronet_EngineParams_disabled_cipher_suites_get(
+    const Cronet_EngineParamsPtr self);
+CRONET_EXPORT
+uint16_t Cronet_EngineParams_min_ssl_version_get(
+    const Cronet_EngineParamsPtr self);
+CRONET_EXPORT
+uint16_t Cronet_EngineParams_max_ssl_version_get(
     const Cronet_EngineParamsPtr self);
 CRONET_EXPORT
 Cronet_String Cronet_EngineParams_accept_language_get(

@@ -16,6 +16,7 @@
 #include "net/base/network_handle.h"
 #include "net/cert/cert_verifier.h"
 #include "net/nqe/effective_connection_type.h"
+#include "net/ssl/ssl_config.h"
 #include "url/origin.h"
 
 namespace net {
@@ -133,6 +134,13 @@ struct URLRequestContextConfig {
   // MappedHostResolver->SetRulesFromString argument
   const std::string resolver_rules;
 
+  // cipher suite config field.
+  const std::string disabled_cipher_suites;
+
+  // ssl version config fields.
+  const uint16_t min_ssl_version;
+  const uint16_t max_ssl_version;
+
   // Certificate verifier for testing.
   std::unique_ptr<net::CertVerifier> mock_cert_verifier;
 
@@ -209,6 +217,11 @@ struct URLRequestContextConfig {
       const std::string& proxy_url,
       // MappedHostResolver->SetRulesFromString argument
       const std::string& resolver_rules,
+      // cipher suite config field.
+      const std::string& disabled_cipher_suites,
+      // ssl version config fields.
+      const uint16_t min_ssl_version,
+      const uint16_t max_ssl_version,
       // JSON encoded experimental options.
       const std::string& unparsed_experimental_options,
       // MockCertVerifier to use for testing purposes.
@@ -247,6 +260,11 @@ struct URLRequestContextConfig {
       const std::string& proxy_url,
       // MappedHostResolver->SetRulesFromString argument
       const std::string& resolver_rules,
+      // cipher suite config field.
+      const std::string& disabled_cipher_suites,
+      // ssl version config fields.
+      const uint16_t min_ssl_version,
+      const uint16_t max_ssl_version,
       // Parsed experimental options.
       base::Value::Dict experimental_options,
       // MockCertVerifier to use for testing purposes.
@@ -319,6 +337,11 @@ struct URLRequestContextConfigBuilder {
   std::string proxy_url = "";
   // MappedHostResolver->SetRulesFromString argument
   std::string resolver_rules = "";
+  // cipher suite config field.
+  std::string disabled_cipher_suites = "";
+  // ssl version config fields.
+  uint16_t min_ssl_version = net::kDefaultSSLVersionMin;
+  uint16_t max_ssl_version = net::kDefaultSSLVersionMax;
   // Experimental options encoded as a string in a JSON format containing
   // experiments and their corresponding configuration options. The format
   // is a JSON object with the name of the experiment as the key, and the
