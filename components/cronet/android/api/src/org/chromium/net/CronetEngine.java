@@ -136,15 +136,6 @@ public abstract class CronetEngine {
         protected final ICronetEngineBuilder mBuilderDelegate;
 
         /**
-         *
-         *
-         */
-        public Builder setProxyUrl(String proxyUrl) {
-            mBuilderDelegate.setProxyUrl(proxyUrl);
-            return this;
-        }
-
-        /**
          * Constructs a {@link Builder} object that facilitates creating a {@link CronetEngine}. The
          * default configuration enables HTTP/2 and QUIC, but disables the HTTP cache.
          *
@@ -262,6 +253,15 @@ public abstract class CronetEngine {
          */
         public Builder enableBrotli(boolean value) {
             mBuilderDelegate.enableBrotli(value);
+            return this;
+        }
+
+        /**
+         * Sets a proxy to use for the Engine. If set, all requests will be sent though the proxy.
+         * Defailts to null, no proxy
+         */
+        public Builder setProxyUrl(String proxyUrl) {
+            mBuilderDelegate.setProxyUrl(proxyUrl);
             return this;
         }
 
