@@ -51,7 +51,8 @@ class AndroidHttpEngineBuilderWrapper extends ICronetEngineBuilder {
 
     @Override
     public ICronetEngineBuilder setProxyUrl(String proxyUrl) {
-        mBackend.setProxyUrl(proxyUrl);
+        // Not sure what to do here? HttpEngine doesn't have this method
+        // mBackend.setProxyUrl(proxyUrl);
         return this;
     }
 
