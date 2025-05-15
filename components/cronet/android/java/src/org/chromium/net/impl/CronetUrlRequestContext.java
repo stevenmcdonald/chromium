@@ -298,7 +298,7 @@ public class CronetUrlRequestContext extends CronetEngineBase {
                             // mUrlRequestContextAdapter is guaranteed to exist until
                             // initialization on init and network threads completes and
                             // initNetworkThread is called back on network thread.
-                            if (builder.getProxyUrl() != null && builder.getProxyUrl().startsWith("socks5://")) {
+                            if (builder.getProxyUrl() != null) {
                                 CronetUrlRequestContextJni.get()
                                     .initRequestContextOnInitThreadWithUri(
 				                        mUrlRequestContextAdapter,
