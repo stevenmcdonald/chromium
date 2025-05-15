@@ -512,8 +512,8 @@ struct EngineParams {
   string user_agent;
 
   /**
-   *
-   *
+   * Use an HTTP(S) or SOCKS proxy. Setting this will use the proxy for all
+   * connections
    */
   string proxy_url;
 

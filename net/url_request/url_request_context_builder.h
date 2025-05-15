@@ -196,9 +196,8 @@ class NET_EXPORT URLRequestContextBuilder {
   void set_accept_language(const std::string& accept_language);
   void set_user_agent(const std::string& user_agent);
 
-  // XXX
-  //
-  //
+  // Set a proxy URL to use for all connections. Surely there's a better
+  // way to do this than patching UrlRequestContextBuilder?
   void set_proxy_url(const std::string& proxy_url);
 
   // Makes the created URLRequestContext use a particular HttpUserAgentSettings

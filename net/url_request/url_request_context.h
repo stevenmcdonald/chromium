@@ -233,6 +233,7 @@ class NET_EXPORT URLRequestContext final {
   // context has been bound to.
   handles::NetworkHandle bound_network() const { return bound_network_; }
 
+  // TODO: Surely there's a better way to do this than adding a variable here?
   void set_proxy_url(const std::string& proxy_url) { proxy_url_ = proxy_url; }
   const std::string& proxy_url() const { return proxy_url_; }
 

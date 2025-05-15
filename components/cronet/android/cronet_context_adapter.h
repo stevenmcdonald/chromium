@@ -103,7 +103,7 @@ class CronetContextAdapter : public CronetContext::Callback {
   // Called on init Java thread to initialize URLRequestContext.
   void InitRequestContextOnInitThread();
 
-  // Called on init Java thread to initialize URLRequestContext.
+  // Called on init Java thread to initialize URLRequestContext with a proxy.
   void InitRequestContextOnInitThreadWithUri(const base::android::JavaParamRef<jstring>& juri);
 
   // Configures the network quality estimator to observe requests to localhost,

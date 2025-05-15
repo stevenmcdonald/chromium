@@ -213,6 +213,7 @@ std::unique_ptr<net::ProxyConfigService> CreateProxyConfigService(
   return service;
 }
 
+// Creates a proxy config service with a fixed proxy URL.
 std::unique_ptr<net::ProxyConfigService> CreateFixedProxyConfigService(
     const scoped_refptr<base::SequencedTaskRunner>& io_task_runner, base::StringPiece uri) {
   std::unique_ptr<net::ProxyConfigService> service =

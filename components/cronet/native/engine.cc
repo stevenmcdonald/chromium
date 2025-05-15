@@ -201,7 +201,7 @@ Cronet_RESULT Cronet_EngineImpl::StartWithParams(
   // @VisibleForTesting (as the only external use will be in a test).
 
 
-  // Initialize context on the init thread.
+  // Initialize context on the init thread, potentially with a proxy.
   if (params->proxy_url.empty()) {
     cronet::PostTaskToInitThread(
         FROM_HERE, base::BindOnce(&CronetContext::InitRequestContextOnInitThread,
