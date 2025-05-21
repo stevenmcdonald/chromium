@@ -15,6 +15,7 @@
 #include "base/memory/raw_ptr.h"
 #include "base/no_destructor.h"
 #include "build/build_config.h"
+#include "base/strings/escape.h"
 #include "components/cronet/cronet_context.h"
 #include "components/cronet/cronet_global_state.h"
 #include "components/cronet/native/generated/cronet.idl_impl_struct.h"
@@ -24,6 +25,7 @@
 #include "components/cronet/version.h"
 #include "components/grpc_support/include/bidirectional_stream_c.h"
 #include "net/base/hash_value.h"
+#include "net/base/url_util.h"
 #include "net/url_request/url_request_context.h"
 #include "net/url_request/url_request_context_builder.h"
 #include "net/url_request/url_request_context_getter.h"
@@ -149,6 +151,7 @@ Cronet_RESULT Cronet_EngineImpl::StartWithParams(
   context_config_builder.storage_path = params->storage_path;
   context_config_builder.accept_language = params->accept_language;
   context_config_builder.user_agent = params->user_agent;
+  context_config_builder.envoy_url = params->envoy_url;
   context_config_builder.experimental_options = params->experimental_options;
   context_config_builder.bypass_public_key_pinning_for_local_trust_anchors =
       params->enable_public_key_pinning_bypass_for_local_trust_anchors;
@@ -199,10 +202,34 @@ Cronet_RESULT Cronet_EngineImpl::StartWithParams(
   // private and mark CronetLibraryLoader.postToInitThread() as
   // @VisibleForTesting (as the only external use will be in a test).
 
+  // This supports a 'socks5' param to envoy:// URLs
+  std::string envoy_socks;
+  GURL envoy_temp = GURL(params->envoy_url);
+  for (net::QueryIterator it(envoy_temp); !it.IsAtEnd(); it.Advance()) {
+    auto key = it.GetKey();
+    auto value = it.GetUnescapedValue();
+    if (key.compare("socks5") == 0) {
+      envoy_socks =
+          base::UnescapeURLComponent(value, base::UnescapeRule::NORMAL);
+    }
+  }
   // Initialize context on the init thread.
-  cronet::PostTaskToInitThread(
+  if (!envoy_socks.empty()) {
+    cronet::PostTaskToInitThread(
+      FROM_HERE,
+      base::BindOnce(&CronetContext::InitRequestContextOnInitThreadWithUri,
+                     base::Unretained(context_.get()), std::move(envoy_socks)));
+  } else if (params->envoy_url.rfind("socks5://", 0) == 0) {
+    // socks5:// URL
+    cronet::PostTaskToInitThread(
+      FROM_HERE,
+      base::BindOnce(&CronetContext::InitRequestContextOnInitThreadWithUri,
+                     base::Unretained(context_.get()), params->envoy_url));
+  } else {
+    cronet::PostTaskToInitThread(
       FROM_HERE, base::BindOnce(&CronetContext::InitRequestContextOnInitThread,
                                 base::Unretained(context_.get())));
+  }
   return CheckResult(Cronet_RESULT_SUCCESS);
 }
 

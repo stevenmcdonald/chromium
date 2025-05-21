@@ -14,6 +14,7 @@
 #include "base/compiler_specific.h"
 #include "base/notreached.h"
 #include "base/strings/string_util.h"
+#include "base/strings/string_split.h"
 #include "base/task/sequenced_task_runner.h"
 #include "base/task/single_thread_task_runner.h"
 #include "base/task/thread_pool.h"
@@ -22,6 +23,7 @@
 #include "net/base/cache_type.h"
 #include "net/base/net_errors.h"
 #include "net/base/network_delegate_impl.h"
+#include "net/base/url_util.h"
 #include "net/cert/cert_verifier.h"
 #include "net/cert/ct_log_verifier.h"
 #include "net/cert/ct_verifier.h"
@@ -31,6 +33,7 @@
 #include "net/dns/context_host_resolver.h"
 #include "net/dns/host_resolver.h"
 #include "net/dns/host_resolver_manager.h"
+#include "net/dns/mapped_host_resolver.h"
 #include "net/http/http_auth_handler_factory.h"
 #include "net/http/http_cache.h"
 #include "net/http/http_network_layer.h"
@@ -46,6 +49,7 @@
 #include "net/quic/quic_context.h"
 #include "net/quic/quic_session_pool.h"
 #include "net/socket/network_binding_client_socket_factory.h"
+#include "net/ssl/ssl_cipher_suite_names.h"
 #include "net/ssl/ssl_config_service_defaults.h"
 #include "net/url_request/static_http_user_agent_settings.h"
 #include "net/url_request/url_request_context.h"
@@ -125,6 +129,10 @@ void URLRequestContextBuilder::set_accept_language(
 void URLRequestContextBuilder::set_user_agent(const std::string& user_agent) {
   DCHECK(!http_user_agent_settings_);
   user_agent_ = user_agent;
+}
+
+void URLRequestContextBuilder::set_envoy_url(const std::string& envoy_url) {
+  envoy_url_ = envoy_url;
 }
 
 void URLRequestContextBuilder::set_http_user_agent_settings(
@@ -284,6 +292,8 @@ std::unique_ptr<URLRequestContext> URLRequestContextBuilder::Build() {
       require_network_anonymization_key_);
   context->set_network_quality_estimator(network_quality_estimator_);
 
+  if (!envoy_url_.empty())
+    context->set_envoy_url(envoy_url_);
   if (http_user_agent_settings_) {
     context->set_http_user_agent_settings(std::move(http_user_agent_settings_));
   } else {
@@ -371,13 +381,52 @@ std::unique_ptr<URLRequestContext> URLRequestContextBuilder::Build() {
     }
   }
   host_resolver_->SetRequestContext(context.get());
-  context->set_host_resolver(std::move(host_resolver_));
+
+  auto envoy_url = GURL(envoy_url_);
+  std::string value;
+  GetValueForKeyInQuery(envoy_url, "url", &value);
+  // TODO assert value
+  auto url = GURL(value);
+
+  if (GetValueForKeyInQuery(envoy_url, "resolve", &value)) {
+    std::unique_ptr<net::MappedHostResolver> remapped_resolver(
+        new net::MappedHostResolver(std::move(host_resolver_)));
+    remapped_resolver->SetRulesFromString(value);
+    context->set_host_resolver(std::move(remapped_resolver));
+  } else if (GetValueForKeyInQuery(envoy_url, "address", &value)) {
+    std::unique_ptr<net::MappedHostResolver> remapped_resolver(
+        new net::MappedHostResolver(std::move(host_resolver_)));
+    remapped_resolver->SetRulesFromString("MAP " + url.host() + " " + value);
+    context->set_host_resolver(std::move(remapped_resolver));
+  } else {
+    context->set_host_resolver(std::move(host_resolver_));
+  }
 
   if (ssl_config_service_) {
     context->set_ssl_config_service(std::move(ssl_config_service_));
   } else {
-    context->set_ssl_config_service(
-        std::make_unique<SSLConfigServiceDefaults>());
+    SSLContextConfig ssl_context_config;
+    std::vector<uint16_t> disabled_ciphers;
+    if (GetValueForKeyInQuery(envoy_url, "disabled_cipher_suites", &value)) {
+      auto cipher_strings = base::SplitString(value, ",", base::TRIM_WHITESPACE, base::SPLIT_WANT_ALL);
+      // see net::ParseCipherSuites(cipher_strings);
+      std::vector<uint16_t> cipher_suites;
+      cipher_suites.reserve(cipher_strings.size());
+
+      for (auto it = cipher_strings.begin(); it != cipher_strings.end(); ++it) {
+        uint16_t cipher_suite = 0;
+        if (!net::ParseSSLCipherString(*it, &cipher_suite)) {
+          LOG(ERROR) << "Ignoring unrecognized or unparsable cipher suite: " << *it;
+          continue;
+        }
+        cipher_suites.push_back(cipher_suite);
+      }
+      std::sort(cipher_suites.begin(), cipher_suites.end());
+
+      ssl_context_config.disabled_cipher_suites =  cipher_suites;
+    }
+    auto ssl_config_service_ptr = std::make_unique<SSLConfigServiceDefaults>(ssl_context_config);
+    context->set_ssl_config_service(std::move(ssl_config_service_ptr));
   }
 
   if (http_auth_handler_factory_) {

@@ -233,6 +233,9 @@ class NET_EXPORT URLRequestContext final {
   // context has been bound to.
   handles::NetworkHandle bound_network() const { return bound_network_; }
 
+  void set_envoy_url(const std::string& envoy_url) { envoy_url_ = envoy_url; }
+  const std::string& envoy_url() const { return envoy_url_; }
+
   void AssertCalledOnValidThread() {
     DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);
   }
@@ -380,6 +383,8 @@ class NET_EXPORT URLRequestContext final {
   bool require_network_anonymization_key_ = false;
 
   std::optional<std::string> cookie_deprecation_label_;
+
+  std::string envoy_url_;
 
   handles::NetworkHandle bound_network_;
 

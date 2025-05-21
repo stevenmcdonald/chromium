@@ -510,6 +510,7 @@ struct EngineParams {
    * set User-Agent header will override a value set using this param.
    */
   string user_agent;
+  string envoy_url;
 
   /**
    * Sets a default value for the Accept-Language header value for UrlRequests

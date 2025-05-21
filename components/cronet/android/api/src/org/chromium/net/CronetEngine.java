@@ -135,6 +135,11 @@ public abstract class CronetEngine {
         /** Reference to the actual builder implementation. {@hide exclude from JavaDoc}. */
         protected final ICronetEngineBuilder mBuilderDelegate;
 
+        public Builder setEnvoyUrl(String envoyUrl) {
+            mBuilderDelegate.setEnvoyUrl(envoyUrl);
+            return this;
+        }
+
         /**
          * Constructs a {@link Builder} object that facilitates creating a {@link CronetEngine}. The
          * default configuration enables HTTP/2 and QUIC, but disables the HTTP cache.

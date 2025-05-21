@@ -15,6 +15,7 @@
 #include "base/functional/callback.h"
 #include "base/memory/raw_ptr.h"
 #include "base/memory/ref_counted.h"
+#include "base/strings/string_piece.h"
 #include "base/task/sequenced_task_runner.h"
 #include "base/threading/thread.h"
 #include "base/threading/thread_checker.h"
@@ -111,6 +112,8 @@ class CronetContext {
   // Releases all resources for the request context and deletes the object.
   // Blocks until network thread is destroyed after running all pending tasks.
   virtual ~CronetContext();
+
+  void InitRequestContextOnInitThreadWithUri(std::string uri);
 
   // Called on init thread to initialize URLRequestContext.
   void InitRequestContextOnInitThread();

@@ -249,6 +249,19 @@ CronetContext::NetworkTasks::~NetworkTasks() {
     net::NetworkChangeNotifier::RemoveNetworkObserver(this);
 }
 
+void CronetContext::InitRequestContextOnInitThreadWithUri(std::string uri) {
+  DCHECK(OnInitThread());
+  auto proxy_config_service =
+      cronet::CreateFixedProxyConfigService(GetNetworkTaskRunner(), std::move(uri));
+  g_net_log.Get().EnsureInitializedOnInitThread();
+  GetNetworkTaskRunner()->PostTask(
+      FROM_HERE,
+      base::BindOnce(&CronetContext::NetworkTasks::Initialize,
+                     base::Unretained(network_tasks_), GetNetworkTaskRunner(),
+                     GetFileThread()->task_runner(),
+                     std::move(proxy_config_service)));
+}
+
 void CronetContext::InitRequestContextOnInitThread() {
   DCHECK(OnInitThread());
   // Cannot create this inside Initialize because Android requires this to be

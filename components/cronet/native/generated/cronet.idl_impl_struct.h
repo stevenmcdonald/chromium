@@ -82,6 +82,7 @@ struct Cronet_EngineParams {
 
   bool enable_check_result = true;
   std::string user_agent;
+  std::string envoy_url;
   std::string accept_language;
   std::string storage_path;
   bool enable_quic = true;

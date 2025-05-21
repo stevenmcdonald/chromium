@@ -37,6 +37,7 @@ import org.chromium.net.urlconnection.CronetURLStreamHandlerFactory;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.net.URLStreamHandlerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -298,10 +299,30 @@ public class CronetUrlRequestContext extends CronetEngineBase {
                             // mUrlRequestContextAdapter is guaranteed to exist until
                             // initialization on init and network threads completes and
                             // initNetworkThread is called back on network thread.
-                            CronetUrlRequestContextJni.get()
-                                    .initRequestContextOnInitThread(
-                                            mUrlRequestContextAdapter,
-                                            CronetUrlRequestContext.this);
+                            String socks_url = "";
+                            if (builder.getEnvoyUrl() != null && builder.getEnvoyUrl().startsWith("socks5://")) {
+                                socks_url = builder.getEnvoyUrl();
+                            } else if (builder.getEnvoyUrl() != null && builder.getEnvoyUrl().startsWith("envoy://") && builder.getEnvoyUrl().contains("?")) {
+                                String[] pairs = builder.getEnvoyUrl().split("\\?")[1].split("&");
+
+                                for (int i = 0; i < pairs.length; i++) {
+                                    String[] queryParts = pairs[i].split("=");
+                                    if (queryParts[0].equals("socks5")) {
+                                        socks_url = URLDecoder.decode(queryParts[1]);
+                                    }
+                                }
+                            }
+
+                            // Log.e(LOG_TAG, "Envoy URL: " + builder.getEnvoyUrl());
+                            // Log.e(LOG_TAG, "Envoy SOCKS: " + socks_url);
+
+                            if (socks_url.equals("")) {
+                                CronetUrlRequestContextJni.get().initRequestContextOnInitThread(
+                                    mUrlRequestContextAdapter, CronetUrlRequestContext.this);
+                            } else {
+                                CronetUrlRequestContextJni.get().initRequestContextOnInitThreadWithUri(
+                                    mUrlRequestContextAdapter, CronetUrlRequestContext.this, socks_url);
+                            }
                         }
 
                         if (cronetInitializedInfoLogger != null) {
@@ -1039,6 +1060,9 @@ public class CronetUrlRequestContext extends CronetEngineBase {
         long createRequestContextAdapter(long urlRequestContextConfig);
 
         byte[] getHistogramDeltas();
+
+        @NativeClassQualifiedName("CronetContextAdapter")
+        void initRequestContextOnInitThreadWithUri(long nativePtr, CronetUrlRequestContext caller, String uri);
 
         @NativeClassQualifiedName("CronetContextAdapter")
         void destroy(long nativePtr, CronetUrlRequestContext caller);

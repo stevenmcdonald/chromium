@@ -77,6 +77,8 @@ public abstract class ICronetEngineBuilder {
 
     public abstract String getDefaultUserAgent();
 
+    public abstract ICronetEngineBuilder setEnvoyUrl(String envoyUrl);
+
     public abstract ExperimentalCronetEngine build();
 
     /**

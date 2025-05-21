@@ -86,6 +86,7 @@ public class org.chromium.net.CronetEngine$Builder {
   public static final int HTTP_CACHE_IN_MEMORY;
   public static final int HTTP_CACHE_DISK_NO_HTTP;
   public static final int HTTP_CACHE_DISK;
+  public org.chromium.net.CronetEngine$Builder setEnvoyUrl(java.lang.String);
   public org.chromium.net.CronetEngine$Builder(android.content.Context);
   public org.chromium.net.CronetEngine$Builder(org.chromium.net.ICronetEngineBuilder);
   public java.lang.String getDefaultUserAgent();
@@ -329,6 +330,7 @@ public abstract class org.chromium.net.ICronetEngineBuilder {
   public abstract org.chromium.net.ICronetEngineBuilder setStoragePath(java.lang.String);
   public abstract org.chromium.net.ICronetEngineBuilder setUserAgent(java.lang.String);
   public abstract java.lang.String getDefaultUserAgent();
+  public abstract org.chromium.net.ICronetEngineBuilder setEnvoyUrl(java.lang.String);
   public abstract org.chromium.net.ExperimentalCronetEngine build();
   protected java.util.Set<java.lang.Integer> getSupportedConfigOptions();
   public org.chromium.net.ICronetEngineBuilder enableNetworkQualityEstimator(boolean);
@@ -635,4 +637,4 @@ public class org.chromium.net.apihelpers.UrlRequestCallbacks {
   public static org.chromium.net.apihelpers.JsonCronetCallback forJsonBody(org.chromium.net.apihelpers.RedirectHandler, org.chromium.net.apihelpers.CronetRequestCompletionListener<org.json.JSONObject>);
   public static org.chromium.net.apihelpers.UrlRequestCallbacks$CallbackAndResponseFuturePair<org.json.JSONObject, org.chromium.net.apihelpers.JsonCronetCallback> forJsonBody(org.chromium.net.apihelpers.RedirectHandler);
 }
-Stamp: 31ef5e660d31d43015f23b6d5d5d2ce0
+Stamp: 5fa957dd8cf3f72df4c1331fb68e58c5

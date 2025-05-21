@@ -134,6 +134,11 @@ public class ExperimentalOptionsTranslationTestUtil {
         }
 
         @Override
+        public ICronetEngineBuilder setEnvoyUrl(String envoyUrl) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public ICronetEngineBuilder addQuicHint(String host, int port, int alternatePort) {
             throw new UnsupportedOperationException();
         }

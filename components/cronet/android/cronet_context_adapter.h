@@ -50,6 +50,11 @@ class CronetContextAdapter : public CronetContext::Callback {
       JNIEnv* env,
       const base::android::JavaParamRef<jobject>& jcaller);
 
+  void InitRequestContextOnInitThreadWithUri(
+      JNIEnv* env,
+      const base::android::JavaParamRef<jobject>& jcaller,
+      const base::android::JavaParamRef<jstring>& juri);
+
   // Releases all resources for the request context and deletes the object.
   // Blocks until network thread is destroyed after running all pending tasks.
   void Destroy(JNIEnv* env,
@@ -97,6 +102,9 @@ class CronetContextAdapter : public CronetContext::Callback {
 
   // Called on init Java thread to initialize URLRequestContext.
   void InitRequestContextOnInitThread();
+
+  // Called on init Java thread to initialize URLRequestContext.
+  void InitRequestContextOnInitThreadWithUri(const base::android::JavaParamRef<jstring>& juri);
 
   // Configures the network quality estimator to observe requests to localhost,
   // to use smaller responses when estimating throughput, and to disable the

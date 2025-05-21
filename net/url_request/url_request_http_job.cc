@@ -29,6 +29,7 @@
 #include "base/notreached.h"
 #include "base/numerics/safe_conversions.h"
 #include "base/rand_util.h"
+#include "base/strings/escape.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_util.h"
 #include "base/strings/stringprintf.h"
@@ -718,6 +719,53 @@ void URLRequestHttpJob::StartTransactionInternal() {
       if (is_shared_dictionary_read_allowed_callback_) {
         transaction_->SetIsSharedDictionaryReadAllowedCallback(
             is_shared_dictionary_read_allowed_callback_);
+      }
+
+      // Don't use the Envoy proxy when LOAD_BYPASS_PROXY is set
+      // Specifically, we don't want to use Envoy for DoH requests
+      if (!(request_info_.load_flags & LOAD_BYPASS_PROXY)) {
+
+        if (request_->context()->envoy_url().rfind("http://", 0) == 0 ||
+            request_->context()->envoy_url().rfind("https://", 0) == 0 ||
+            request_->context()->envoy_url().rfind("envoy://", 0) == 0) {
+          // https://developer.android.com/reference/android/provider/Settings.Secure.html#ANDROID_ID
+          // default to random value, no cache at all
+          auto salt = base::RandBytesAsString(16);
+          auto envoy_url = GURL(request_->context()->envoy_url());
+          if (envoy_url.SchemeIsHTTPOrHTTPS()) {
+            request_info_.url = envoy_url; // TODO check is_vaid() before set
+          } else if (envoy_url.scheme().compare("envoy") == 0) {
+            std::string headerPrefix = "header_";
+            auto headerPrefixLength = headerPrefix.size();
+
+            for (QueryIterator it(envoy_url); !it.IsAtEnd(); it.Advance()) {
+              auto key = it.GetKey();
+              auto value = it.GetUnescapedValue();
+              if (key.compare("url") == 0) {
+                // see GetUnescapedValue, TODO check is_valid() before set
+                request_info_.url =
+                    GURL(base::UnescapeURLComponent(value, base::UnescapeRule::NORMAL));
+            } else if (key.compare("salt") == 0) {
+                    salt = value;
+              } else if (key.rfind(headerPrefix, 0) == 0 &&
+                        key.size() > headerPrefixLength) {
+                request_info_.extra_headers.SetHeader(
+                    key.substr(headerPrefixLength), value); // check for header Host, add :authority for http2; :path for http2
+              }
+            }
+          }
+
+
+          // count for cache key
+          auto digest = crypto::SHA256HashString(request_->url().spec() + salt);
+          request_info_.url =
+              AppendQueryParameter(request_info_.url, "_digest", digest);
+          // TODO encode field value
+          request_info_.extra_headers.SetHeader("Url-Orig",
+                                                request_->url().spec());
+          request_info_.extra_headers.SetHeader("Host-Orig",
+                                                request_->url().host());
+        }
       }
 
       rv = transaction_->Start(

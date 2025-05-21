@@ -80,6 +80,16 @@ void CronetContextAdapter::InitRequestContextOnInitThread(
   context_->InitRequestContextOnInitThread();
 }
 
+void CronetContextAdapter::InitRequestContextOnInitThreadWithUri(
+    JNIEnv* env,
+    const JavaParamRef<jobject>& jcaller,
+    const JavaParamRef<jstring>& juri) {
+  jcronet_url_request_context_.Reset(env, jcaller);
+  std::string uri(
+      base::android::ConvertJavaStringToUTF8(env, juri));
+  context_->InitRequestContextOnInitThreadWithUri(uri);
+}
+
 void CronetContextAdapter::ConfigureNetworkQualityEstimatorForTesting(
     JNIEnv* env,
     const JavaParamRef<jobject>& jcaller,
@@ -243,6 +253,7 @@ static jlong JNI_CronetUrlRequestContext_CreateRequestContextConfig(
           configOptions.http_cache_max_size(), configOptions.disable_cache(),
           configOptions.storage_path(),
           /* accept_languages */ std::string(), configOptions.user_agent(),
+          configOptions.envoy_url(),
           configOptions.experimental_options(),
           base::WrapUnique(reinterpret_cast<net::CertVerifier*>(
               configOptions.mock_cert_verifier())),

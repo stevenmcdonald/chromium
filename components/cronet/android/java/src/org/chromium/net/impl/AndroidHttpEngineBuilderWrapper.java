@@ -44,6 +44,13 @@ class AndroidHttpEngineBuilderWrapper extends ICronetEngineBuilder {
     }
 
     @Override
+    public ICronetEngineBuilder setEnvoyUrl(String envoyUrl) {
+        // I'm not sure what's going on here, but I don't think we need this for Envoy -steve
+        // mBackend.setEnvoyUrl(envoyUrl);
+        return this;
+    }
+
+    @Override
     public ICronetEngineBuilder setUserAgent(String userAgent) {
         mBackend.setUserAgent(userAgent);
         return this;
