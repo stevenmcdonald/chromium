@@ -44,7 +44,7 @@ TEST(SampleTest, TestConnectionRefused) {
   EXPECT_NE(std::string::npos, sample_out.find("net::ERR_INVALID_URL"));
 }
 
-}  // namespace
+}
 
 int main(int argc, char** argv) {
   s_test_app_path = argv[0];

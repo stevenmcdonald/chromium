@@ -319,6 +319,16 @@ void RecordSTSHistograms(net::SSLUpgradeDecision upgrade_decision,
       GetMetricForSSLUpgradeDecision(upgrade_decision, is_secure));
 }
 
+// For parsing b64 OHTTP config in Envoy URL
+std::vector<uint8_t> base64_decode(const std::string& input) {
+    uint8_t* output = new uint8_t[input.size()];
+    int actual_length = EVP_DecodeBlock(output,
+                                        reinterpret_cast<const unsigned char*>(input.data()),
+                                        input.size());
+    std::vector<uint8_t> decoded(output, output + actual_length);
+    return decoded;
+}
+
 }  // namespace
 
 namespace net {
@@ -667,7 +677,6 @@ void URLRequestHttpJob::MaybeStartTransactionInternal(int result) {
 
 void URLRequestHttpJob::StartTransactionInternal() {
   DCHECK(!override_response_headers_);
-
   // NOTE: This method assumes that request_info_ is already setup properly.
 
   // If we already have a transaction, then we should restart the transaction
@@ -689,6 +698,48 @@ void URLRequestHttpJob::StartTransactionInternal() {
   } else {
     DCHECK(request_->context()->http_transaction_factory());
 
+    // refactor this with the same conditional below
+    if (!(request_info_.load_flags & LOAD_BYPASS_PROXY)) {
+      if (request_->context()->envoy_url().rfind("http://", 0) == 0 ||
+                    request_->context()->envoy_url().rfind("https://", 0) == 0 ||
+                    request_->context()->envoy_url().rfind("envoy://", 0) == 0) {
+        size_t pkR_len = 32;
+        // Get the OHTTP Config from the Envoy URL
+        size_t ohttp_config_start = request_->context()->envoy_url().find("ohttp_config=");
+        DCHECK(ohttp_config_start != std::string::npos);
+        ohttp_config_start += 13;
+        size_t ohttp_config_end = request_->context()->envoy_url().find("&", ohttp_config_start);
+        if (ohttp_config_end == std::string::npos) {
+          ohttp_config_end = request_->context()->envoy_url().size();
+        }
+        std::string ohttp_config = request_->context()->envoy_url().substr(ohttp_config_start, ohttp_config_end - ohttp_config_start);
+        // base64 decode the envoy config
+        std::vector<uint8_t> envoy_config_decoded = base64_decode(ohttp_config);
+        std::vector<uint8_t> pkR_vec = ohttp::get_public_key(envoy_config_decoded);
+        DCHECK(pkR_vec.size() == pkR_len);
+        uint8_t pkR[pkR_len];
+        std::copy(pkR_vec.begin(), pkR_vec.end(), pkR);
+        sender_context = ohttp::createHpkeContext();
+        byte_data = ohttp::get_encapsulated_request(
+          sender_context,
+          request_info_.method,
+          request_info_.url.scheme(),
+          request_info_.url.host(),
+          request_info_.url.path(),
+          "", // TODO: read the provided upload_data_stream
+          client_enc, &client_enc_len,
+          pkR, pkR_len);
+        const char* request_data = reinterpret_cast<const char*>(byte_data.data());
+        std::vector<std::unique_ptr<UploadElementReader>> readers;
+        readers.push_back(
+          std::make_unique<net::UploadBytesElementReader>(request_data, byte_data.size()));
+        std::unique_ptr<UploadDataStream> upload_stream =
+          std::make_unique<ElementsUploadDataStream>(std::move(readers), 0);
+        SetUpload(upload_stream.release());
+      }
+    }
+
+    // This sets transaction_, so the upload must be changed before this point
     rv = request_->context()->http_transaction_factory()->CreateTransaction(
         priority_, &transaction_);
 
@@ -710,6 +761,7 @@ void URLRequestHttpJob::StartTransactionInternal() {
     }
 
     if (rv == OK) {
+
       transaction_->SetConnectedCallback(base::BindRepeating(
           &URLRequestHttpJob::NotifyConnectedCallback, base::Unretained(this)));
       transaction_->SetRequestHeadersCallback(request_headers_callback_);
@@ -744,18 +796,21 @@ void URLRequestHttpJob::StartTransactionInternal() {
               if (key.compare("url") == 0) {
                 // see GetUnescapedValue, TODO check is_valid() before set
                 request_info_.url =
-                    GURL(base::UnescapeURLComponent(value, base::UnescapeRule::NORMAL));
+                  GURL(base::UnescapeURLComponent(value, base::UnescapeRule::NORMAL));
             } else if (key.compare("salt") == 0) {
-                    salt = value;
-              } else if (key.rfind(headerPrefix, 0) == 0 &&
-                        key.size() > headerPrefixLength) {
+                  salt = value;
+            } else if (key.rfind(headerPrefix, 0) == 0 &&
+                       key.size() > headerPrefixLength) {
                 request_info_.extra_headers.SetHeader(
-                    key.substr(headerPrefixLength), value); // check for header Host, add :authority for http2; :path for http2
+                key.substr(headerPrefixLength), value); // check for header Host, add :authority for http2; :path for http2
               }
+            } else if (key.compare("ohttp") == 0) {
+              request_info_.method = "POST";
+              request_info_.extra_headers.SetHeader("Content-Type", "message/ohttp-req");
             }
           }
 
-
+          // XXX don't do this stuff for OHTTP?
           // count for cache key
           auto digest = crypto::SHA256HashString(request_->url().spec() + salt);
           request_info_.url =
@@ -1715,22 +1770,61 @@ bool URLRequestHttpJob::ShouldFixMismatchedContentLength(int rv) const {
 int URLRequestHttpJob::ReadRawData(IOBuffer* buf, int buf_size) {
   DCHECK_NE(buf_size, 0);
   DCHECK(!read_in_progress_);
+  // This should be modified
+  // It should not give the caller data if the transaction is not done
+  // When the transaction *is* done, it should ohttp decapsulate it
+  // if necessary, and then give it to the caller
+  int rv;
+  if (!byte_data.empty()) {
+    scoped_refptr<IOBufferWithSize> tbuf = base::MakeRefCounted<IOBufferWithSize>(buf_size);
+    rv = transaction_->Read(tbuf.get(), buf_size,
+                                base::BindOnce(&URLRequestHttpJob::OnReadCompleted,
+                                               base::Unretained(this)));
+    // Read the contents of the temporary buffer into response data vector
+    if (rv > 0) {
+      response_data.insert(response_data.end(), tbuf->data(), tbuf->data() + rv);
+      size_t max_drequest_len = response_data.size();
+      uint8_t dresponse[max_drequest_len];
+      size_t dresponse_len;
+      ohttp::DecapsulationErrorCode decap_result = decapsulate_response(
+        sender_context, 
+        client_enc, 
+        client_enc_len, 
+        response_data,
+        dresponse,
+        &dresponse_len, 
+        max_drequest_len);
+      if (decap_result != ohttp::DecapsulationErrorCode::SUCCESS) {
+        return ERR_FAILED;  // Why did we fail? Are we not done reading from the network?  Handle that differently.
+      }
+      std::vector<uint8_t> dresponse_as_vec;
+      dresponse_as_vec.insert(dresponse_as_vec.end(), dresponse, dresponse + dresponse_len);
+      std::string body = ohttp::get_body_from_binary_response(dresponse_as_vec);
 
-  int rv =
-      transaction_->Read(buf, buf_size,
-                         base::BindOnce(&URLRequestHttpJob::OnReadCompleted,
-                                        base::Unretained(this)));
+      // Copy the decapsulated response into the buffer
+      memcpy(buf->data(), body.c_str(), body.size());
+      return dresponse_len;
+    } else {
+      DoneWithRequest(FINISHED);
+      return rv;
+    }
+  } else {
+    // usual control flow
+    rv =
+        transaction_->Read(buf, buf_size,
+                          base::BindOnce(&URLRequestHttpJob::OnReadCompleted,
+                                          base::Unretained(this)));
+    if (ShouldFixMismatchedContentLength(rv))
+      rv = OK;
 
-  if (ShouldFixMismatchedContentLength(rv))
-    rv = OK;
-
-  if (rv == 0 || (rv < 0 && rv != ERR_IO_PENDING))
-    DoneWithRequest(FINISHED);
-
-  if (rv == ERR_IO_PENDING)
-    read_in_progress_ = true;
-
-  return rv;
+    if (rv == 0 || (rv < 0 && rv != ERR_IO_PENDING)) {
+      DoneWithRequest(FINISHED);
+    }
+    if (rv == ERR_IO_PENDING) {
+      read_in_progress_ = true;
+    }
+    return rv;
+  }
 }
 
 int64_t URLRequestHttpJob::GetTotalReceivedBytes() const {

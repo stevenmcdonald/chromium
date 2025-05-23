@@ -61,6 +61,12 @@ class NET_EXPORT_PRIVATE URLRequestHttpJob : public URLRequestJob {
   void SetIsSharedDictionaryReadAllowedCallback(
       base::RepeatingCallback<bool()> callback) override;
 
+  std::vector<uint8_t> byte_data;
+  std::vector<uint8_t> response_data;
+  ohttp::OHTTP_HPKE_CTX* sender_context;
+  uint8_t client_enc[65];  // TODO: Don't hardcode this.  However, variables not permitted.
+  size_t client_enc_len;
+
  protected:
   URLRequestHttpJob(URLRequest* request,
                     const HttpUserAgentSettings* http_user_agent_settings);

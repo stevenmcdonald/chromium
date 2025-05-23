@@ -1058,6 +1058,7 @@ component("net") {
     "//net/dns:mdns_client",
     "//net/dns/public",
     "//net/third_party/quiche",
+    "//third_party/ohttp",
   ]
 
   allow_circular_includes_from = [

@@ -29,17 +29,17 @@ void SampleUrlRequestCallback::OnRedirectReceived(
     Cronet_UrlRequestPtr request,
     Cronet_UrlResponseInfoPtr info,
     Cronet_String newLocationUrl) {
-  std::cout << "OnRedirectReceived called: " << newLocationUrl << std::endl;
+  // std::cout << "SampleUrlRequestCallback::OnRedirectReceived called: " << newLocationUrl << std::endl;
   Cronet_UrlRequest_FollowRedirect(request);
 }
 
 void SampleUrlRequestCallback::OnResponseStarted(
     Cronet_UrlRequestPtr request,
     Cronet_UrlResponseInfoPtr info) {
-  std::cout << "OnResponseStarted called." << std::endl;
-  std::cout << "HTTP Status: "
-            << Cronet_UrlResponseInfo_http_status_code_get(info) << " "
-            << Cronet_UrlResponseInfo_http_status_text_get(info) << std::endl;
+  // std::cout << "SampleUrlRequestCallback::OnResponseStarted called." << std::endl;
+  // std::cout << "HTTP Status to Caller: " << std::dec
+            // << Cronet_UrlResponseInfo_http_status_code_get(info) << " "
+            // << Cronet_UrlResponseInfo_http_status_text_get(info) << std::endl;
   // Create and allocate 32kb buffer.
   Cronet_BufferPtr buffer = Cronet_Buffer_Create();
   Cronet_Buffer_InitWithAlloc(buffer, 32 * 1024);
@@ -51,8 +51,10 @@ void SampleUrlRequestCallback::OnReadCompleted(Cronet_UrlRequestPtr request,
                                                Cronet_UrlResponseInfoPtr info,
                                                Cronet_BufferPtr buffer,
                                                uint64_t bytes_read) {
-  std::cout << "OnReadCompleted called: " << bytes_read << " bytes read."
-            << std::endl;
+  // std::cout << "SampleUrlRequestCallback::OnReadCompleted called: " << bytes_read << " bytes read."
+            // << std::endl;
+  // It's possible that the data's not ready yet so it hasn't been decapsulated.
+  // If that's true, we need to deal with that.
   std::string last_read_data(
       reinterpret_cast<char*>(Cronet_Buffer_GetData(buffer)), bytes_read);
   response_as_string_ += last_read_data;
@@ -62,22 +64,22 @@ void SampleUrlRequestCallback::OnReadCompleted(Cronet_UrlRequestPtr request,
 
 void SampleUrlRequestCallback::OnSucceeded(Cronet_UrlRequestPtr request,
                                            Cronet_UrlResponseInfoPtr info) {
-  std::cout << "OnSucceeded called." << std::endl;
+  // std::cout << "SampleUrlRequestCallback::OnSucceeded called." << std::endl;
   SignalDone(true);
 }
 
 void SampleUrlRequestCallback::OnFailed(Cronet_UrlRequestPtr request,
                                         Cronet_UrlResponseInfoPtr info,
                                         Cronet_ErrorPtr error) {
-  std::cout << "OnFailed called: " << Cronet_Error_message_get(error)
-            << std::endl;
+  // std::cout << "SampleUrlRequestCallback::OnFailed called: " << Cronet_Error_message_get(error)
+            // << std::endl;
   last_error_message_ = Cronet_Error_message_get(error);
   SignalDone(false);
 }
 
 void SampleUrlRequestCallback::OnCanceled(Cronet_UrlRequestPtr request,
                                           Cronet_UrlResponseInfoPtr info) {
-  std::cout << "OnCanceled called." << std::endl;
+  // std::cout << "OnCanceled called." << std::endl;
   SignalDone(false);
 }
 

@@ -1,0 +1,21 @@
+import("//testing/test.gni")
+
+source_set("ohttp") {
+  sources = [
+    "ohttp.cc",
+  ]
+  public = [
+    "ohttp.h"
+  ]
+  public_deps = [
+    "//third_party/boringssl",
+  ]
+}
+
+test("ohttp_test") {
+    sources = [ "ohttp_test.cc" ]
+    deps = [
+        ":ohttp",
+        "//testing/gtest:gtest",
+    ]
+}

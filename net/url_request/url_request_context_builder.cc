@@ -54,6 +54,7 @@
 #include "net/url_request/static_http_user_agent_settings.h"
 #include "net/url_request/url_request_context.h"
 #include "net/url_request/url_request_job_factory.h"
+#include "third_party/ohttp/ohttp.h"
 #include "url/url_constants.h"
 
 #if BUILDFLAG(ENABLE_REPORTING)
@@ -292,8 +293,10 @@ std::unique_ptr<URLRequestContext> URLRequestContextBuilder::Build() {
       require_network_anonymization_key_);
   context->set_network_quality_estimator(network_quality_estimator_);
 
-  if (!envoy_url_.empty())
+  // Give the context the Envoy URL
+  if (!envoy_url_.empty()) {
     context->set_envoy_url(envoy_url_);
+  }
   if (http_user_agent_settings_) {
     context->set_http_user_agent_settings(std::move(http_user_agent_settings_));
   } else {
@@ -388,6 +391,7 @@ std::unique_ptr<URLRequestContext> URLRequestContextBuilder::Build() {
   // TODO assert value
   auto url = GURL(value);
 
+  // Set resolve/address/MAP, if specified.
   if (GetValueForKeyInQuery(envoy_url, "resolve", &value)) {
     std::unique_ptr<net::MappedHostResolver> remapped_resolver(
         new net::MappedHostResolver(std::move(host_resolver_)));
@@ -407,6 +411,7 @@ std::unique_ptr<URLRequestContext> URLRequestContextBuilder::Build() {
   } else {
     SSLContextConfig ssl_context_config;
     std::vector<uint16_t> disabled_ciphers;
+    // Disable cipher suites, if specified
     if (GetValueForKeyInQuery(envoy_url, "disabled_cipher_suites", &value)) {
       auto cipher_strings = base::SplitString(value, ",", base::TRIM_WHITESPACE, base::SPLIT_WANT_ALL);
       // see net::ParseCipherSuites(cipher_strings);
