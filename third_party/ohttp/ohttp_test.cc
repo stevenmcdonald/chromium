@@ -145,7 +145,7 @@ TEST(OhttpTest, TestBinaryResponse) {
     // }
     1,
 
-    64, // XXX this shows up in the data not sure why, is it an informational
+    // 64, // XXX this shows up in the data not sure why, is it an informational
         // response?
 
     // No informational responses in this test.
