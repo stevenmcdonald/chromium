@@ -11,7 +11,9 @@
 #include "base/task/sequenced_task_runner.h"
 #include "base/task/single_thread_task_runner.h"
 #include "build/build_config.h"
+#include "net/base/proxy_string_util.h"
 #include "net/proxy_resolution/proxy_config_with_annotation.h"
+#include "net/proxy_resolution/proxy_config_service_fixed.h"
 
 #if BUILDFLAG(IS_WIN)
 #include "net/proxy_resolution/win/proxy_config_service_win.h"
@@ -42,6 +44,30 @@ constexpr net::NetworkTrafficAnnotationTag kSystemProxyConfigTrafficAnnotation =
           "settings."
         trigger:
           "Whenever a network request is made when the system proxy settings "
+          "are used, and they indicate to use a proxy server."
+        data:
+          "Proxy configuration."
+        destination: OTHER
+        destination_other:
+          "The proxy server specified in the configuration."
+      }
+      policy {
+        cookies_allowed: NO
+        setting:
+          "User cannot override system proxy settings, but can change them "
+          "through 'Advanced/System/Open proxy settings'."
+        policy_exception_justification:
+          "Using 'ProxySettings' policy can set Chrome to use specific "
+          "proxy settings and avoid system proxy."
+      })");
+constexpr net::NetworkTrafficAnnotationTag kFixedProxyConfigTrafficAnnotation =
+    net::DefineNetworkTrafficAnnotation("proxy_config_fixed", R"(
+      semantics {
+        sender: "Proxy Config"
+        description:
+          "Establishing a connection through a proxy server using fixed proxy."
+        trigger:
+          "Whenever a network request is made when the fixed proxy settings "
           "are used, and they indicate to use a proxy server."
         data:
           "Proxy configuration."
@@ -89,6 +115,22 @@ class ProxyConfigServiceDirect : public ProxyConfigService {
 };
 
 }  // namespace
+
+// static
+std::unique_ptr<ProxyConfigService>
+ProxyConfigService::CreateFixedSystemProxyConfigService(
+    const scoped_refptr<base::SequencedTaskRunner>& main_task_runner, std::string_view uri) {
+  ProxyConfig raw_proxy_config;
+  raw_proxy_config.proxy_rules().type = ProxyConfig::ProxyRules::Type::PROXY_LIST;
+  raw_proxy_config.proxy_rules().single_proxies.SetSingleProxyServer(ProxyUriToProxyServer(uri, ProxyServer::SCHEME_SOCKS5));
+
+#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_APPLE) || BUILDFLAG(IS_LINUX)
+  ProxyConfigWithAnnotation proxy_config = ProxyConfigWithAnnotation(raw_proxy_config, kFixedProxyConfigTrafficAnnotation);
+#else
+  ProxyConfigWithAnnotation proxy_config = ProxyConfigWithAnnotation(raw_proxy_config, NO_TRAFFIC_ANNOTATION_YET);
+#endif
+  return std::make_unique<ProxyConfigServiceFixed>(proxy_config);
+}
 
 // static
 std::unique_ptr<ProxyConfigService>

@@ -99,6 +99,7 @@ public class org.chromium.net.CronetEngine$Builder {
   public org.chromium.net.CronetEngine$Builder setDnsOptions(org.chromium.net.DnsOptions$Builder);
   public org.chromium.net.CronetEngine$Builder setDnsOptions(org.chromium.net.DnsOptions);
   public org.chromium.net.CronetEngine$Builder setLibraryLoader(org.chromium.net.CronetEngine$Builder$LibraryLoader);
+  public org.chromium.net.CronetEngine$Builder setProxyUrl(java.lang.String);
   public org.chromium.net.CronetEngine$Builder setQuicOptions(org.chromium.net.QuicOptions$Builder);
   public org.chromium.net.CronetEngine$Builder setQuicOptions(org.chromium.net.QuicOptions);
   public org.chromium.net.CronetEngine$Builder setStoragePath(java.lang.String);
@@ -323,6 +324,7 @@ public abstract class org.chromium.net.ICronetEngineBuilder {
   public abstract org.chromium.net.ICronetEngineBuilder enableSdch(boolean);
   public abstract org.chromium.net.ICronetEngineBuilder setExperimentalOptions(java.lang.String);
   public abstract org.chromium.net.ICronetEngineBuilder setLibraryLoader(org.chromium.net.CronetEngine$Builder$LibraryLoader);
+  public abstract org.chromium.net.ICronetEngineBuilder setProxyUrl(java.lang.String);
   public abstract org.chromium.net.ICronetEngineBuilder setStoragePath(java.lang.String);
   public abstract org.chromium.net.ICronetEngineBuilder setUserAgent(java.lang.String);
   public org.chromium.net.ICronetEngineBuilder enableBrotli(boolean);
@@ -640,4 +642,4 @@ public class org.chromium.net.apihelpers.UrlRequestCallbacks {
   public static org.chromium.net.apihelpers.UrlRequestCallbacks$CallbackAndResponseFuturePair<java.lang.String, org.chromium.net.apihelpers.StringCronetCallback> forStringBody(org.chromium.net.apihelpers.RedirectHandler);
   public static org.chromium.net.apihelpers.UrlRequestCallbacks$CallbackAndResponseFuturePair<org.json.JSONObject, org.chromium.net.apihelpers.JsonCronetCallback> forJsonBody(org.chromium.net.apihelpers.RedirectHandler);
 }
-Stamp: ded30b9fbe22dff6cc175cd483aa1e4b
+Stamp: 77c7e1b163bf63684a4a0fedc6505679

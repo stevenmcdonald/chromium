@@ -13,6 +13,7 @@ namespace cronet {
 namespace test {
 
 // Create an engine that is configured to support local test servers.
+Cronet_EnginePtr CreateTestEngine(int quic_server_port, const std::string& proxy_url);
 Cronet_EnginePtr CreateTestEngine(int quic_server_port);
 
 // Create an executor that runs tasks on different background thread.

@@ -33,6 +33,9 @@ void PostTaskToInitThread(const base::Location& posted_from,
 // idempotent, and must complete initialization before returning.
 void EnsureInitialized();
 
+std::unique_ptr<net::ProxyConfigService> CreateFixedProxyConfigService(
+    const scoped_refptr<base::SequencedTaskRunner>& io_task_runner, std::string_view uri);
+
 // Creates a proxy config service appropriate for this platform that fetches the
 // system proxy settings. Cronet will call this API only after a prior call
 // to EnsureInitialized() has returned.

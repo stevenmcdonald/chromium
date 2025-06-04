@@ -21,4 +21,5 @@ message RequestContextConfigOptions {
   optional bool enable_network_quality_estimator = 12;
   optional bool bypass_public_key_pinning_for_local_trust_anchors = 13;
   optional int32 network_thread_priority = 14;
+  optional string proxy_url = 15;
 }

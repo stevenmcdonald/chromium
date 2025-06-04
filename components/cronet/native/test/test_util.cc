@@ -52,7 +52,7 @@ class TestCertVerifier : public net::MockCertVerifier {
 namespace cronet {
 namespace test {
 
-Cronet_EnginePtr CreateTestEngine(int quic_server_port) {
+Cronet_EnginePtr CreateTestEngine(int quic_server_port, const std::string& proxy_url) {
   Cronet_EngineParamsPtr engine_params = Cronet_EngineParams_Create();
   Cronet_EngineParams_user_agent_set(engine_params, "test");
   // Add Host Resolver Rules.
@@ -75,6 +75,9 @@ Cronet_EnginePtr CreateTestEngine(int quic_server_port) {
   Cronet_QuicHint_alternate_port_set(quic_hint, 443);
   Cronet_EngineParams_quic_hints_add(engine_params, quic_hint);
   Cronet_QuicHint_Destroy(quic_hint);
+  if(proxy_url != "") {
+    Cronet_EngineParams_proxy_url_set(engine_params, proxy_url.c_str());
+  }
   // Create Cronet Engine.
   Cronet_EnginePtr cronet_engine = Cronet_Engine_Create();
   // Set Mock Cert Verifier.
@@ -85,6 +88,11 @@ Cronet_EnginePtr CreateTestEngine(int quic_server_port) {
   Cronet_Engine_StartWithParams(cronet_engine, engine_params);
   Cronet_EngineParams_Destroy(engine_params);
   return cronet_engine;
+}
+
+Cronet_EnginePtr CreateTestEngine(int quic_server_port) {
+  std::string foo = "";
+  return CreateTestEngine(quic_server_port, foo);
 }
 
 Cronet_ExecutorPtr CreateTestExecutor() {

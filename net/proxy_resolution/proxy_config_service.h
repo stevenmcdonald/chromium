@@ -79,6 +79,12 @@ class NET_EXPORT ProxyConfigService {
   // consumer of the ProxyConfigService will live.
   static std::unique_ptr<ProxyConfigService> CreateSystemProxyConfigService(
       scoped_refptr<base::SequencedTaskRunner> main_task_runner);
+
+  // Creats a config service that uses a (cronet) caller specified proxy.
+  // |main_task_runner| is the sequence where the consumer of the
+  // ProxyConfigService will live. |uri| is the URL of the proxy.
+  static std::unique_ptr<ProxyConfigService> CreateFixedSystemProxyConfigService(
+      const scoped_refptr<base::SequencedTaskRunner>& main_task_runner, std::string_view uri);
 };
 
 }  // namespace net
