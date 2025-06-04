@@ -61,6 +61,8 @@ class TestServer {
   static std::string GetRedirectToEchoBodyURL();
   // Returns a URL that the server will return an Exabyte of data.
   static std::string GetExabyteResponseURL();
+  // Returns A URL to use as a CONNECT proxy to the TestServer.
+  static std::string GetConnectProxyURL();
   // Prepares response and returns URL which respond with |data_size| of bytes
   // in response body.
   static std::string PrepareBigDataURL(size_t data_size);

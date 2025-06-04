@@ -113,6 +113,8 @@ class CronetContext {
   // Blocks until network thread is destroyed after running all pending tasks.
   virtual ~CronetContext();
 
+  void InitRequestContextOnInitThreadWithUri(std::string_view uri);
+
   // Called on init thread to initialize URLRequestContext.
   void InitRequestContextOnInitThread();
 

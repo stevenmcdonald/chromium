@@ -306,8 +306,10 @@ class UrlRequestTest : public ::testing::TestWithParam<
       std::unique_ptr<TestUrlRequestCallback> test_callback,
       const std::string& http_method,
       TestUploadDataProvider* test_upload_data_provider,
-      int remapped_port) {
-    Cronet_EnginePtr engine = cronet::test::CreateTestEngine(remapped_port);
+      int remapped_port,
+      const std::string& proxy_url) {
+    Cronet_EnginePtr engine = cronet::test::CreateTestEngine(remapped_port,
+                                                             proxy_url);
     Cronet_UrlRequestPtr request = Cronet_UrlRequest_Create();
     Cronet_UrlRequestParamsPtr request_params =
         Cronet_UrlRequestParams_Create();
@@ -361,6 +363,18 @@ class UrlRequestTest : public ::testing::TestWithParam<
     Cronet_UrlRequestCallback_Destroy(callback);
     Cronet_Engine_Destroy(engine);
     return test_callback;
+  }
+
+  std::unique_ptr<TestUrlRequestCallback> StartAndWaitForComplete(
+      const std::string& url,
+      std::unique_ptr<TestUrlRequestCallback> test_callback,
+      const std::string& http_method,
+      TestUploadDataProvider* test_upload_data_provider,
+      int remapped_port) {
+    std::string empty = "";
+    return StartAndWaitForComplete(url, std::move(test_callback), http_method,
+                                   test_upload_data_provider, remapped_port,
+                                   /* proxy_url */ empty);
   }
 
   std::unique_ptr<TestUrlRequestCallback> StartAndWaitForComplete(
@@ -656,6 +670,29 @@ TEST_P(UrlRequestTest, InitChecks) {
 TEST_P(UrlRequestTest, SimpleGet) {
   const std::string url = cronet::TestServer::GetEchoMethodURL();
   auto callback = StartAndWaitForComplete(url);
+  EXPECT_EQ(200, callback->response_info()->http_status_code);
+  // Default method is 'GET'.
+  EXPECT_EQ("GET", callback->response_as_string());
+  EXPECT_EQ(0, callback->redirect_count());
+  EXPECT_EQ(callback->response_step(), callback->ON_SUCCEEDED);
+  CheckResponseInfo(*callback->response_info(), url, 200, "OK");
+  TestUrlRequestCallback::UrlResponseInfo expected_response_info(
+      std::vector<std::string>({url}), "OK", 200, 86,
+      std::vector<std::string>({"Connection", "close", "Content-Length", "3",
+                                "Content-Type", "text/plain"}));
+  ExpectResponseInfoEquals(expected_response_info, *callback->response_info());
+}
+
+TEST_P(UrlRequestTest, ProxyGet) {
+  const std::string url = cronet::TestServer::GetEchoMethodURL();
+  const std::string proxy_url = cronet::TestServer::GetConnectProxyURL();
+  auto callback = StartAndWaitForComplete(
+    url,
+    std::make_unique<TestUrlRequestCallback>(GetDirectExecutorParam()), // test_callback
+    std::string(), // http_method
+    nullptr, // test_upload_data_provider
+    0, // remapped_port
+    proxy_url);
   EXPECT_EQ(200, callback->response_info()->http_status_code);
   // Default method is 'GET'.
   EXPECT_EQ("GET", callback->response_as_string());

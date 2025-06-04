@@ -191,6 +191,11 @@ public class ExperimentalOptionsTranslationTestUtil {
         }
 
         @Override
+        public ICronetEngineBuilder setProxyUrl(String value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public ICronetEngineBuilder setConnectionMigrationOptions(
                 ConnectionMigrationOptions options) {
             mConnectionMigrationOptions = options;

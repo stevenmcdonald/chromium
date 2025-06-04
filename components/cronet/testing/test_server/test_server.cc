@@ -42,8 +42,11 @@ const char kSetCookiePath[] = "/set_cookie?";
 const char kBigDataPath[] = "/big_data?";
 const char kUseEncodingPath[] = "/use_encoding?";
 const char kEchoBodyPath[] = "/echo_body";
+const char kConnectProxyPath[] = "/connect_proxy";
 
 const char kSimpleResponse[] = "The quick brown fox jumps over the lazy dog.";
+
+const char kSimpleProxyResponse[] = "HTTP/1.1 200 Connection established\r\n\r\n";
 
 std::unique_ptr<net::EmbeddedTestServer> g_test_server;
 base::LazyInstance<std::string>::Leaky g_big_data_body =
@@ -166,6 +169,12 @@ std::unique_ptr<net::test_server::HttpResponse> CronetTestRequestHandler(
     return std::move(response);
   }
 
+  if (request.relative_url == kConnectProxyPath) {
+    response->set_code(net::HTTP_OK);
+    response->set_content(kSimpleProxyResponse);
+    return std::move(response);
+  }
+
   // Unhandled requests result in the Embedded test server sending a 404.
   return nullptr;
 }
@@ -265,6 +274,11 @@ std::string TestServer::GetRedirectToEchoBodyURL() {
 /* static */
 std::string TestServer::GetExabyteResponseURL() {
   return GetFileURL("/exabyte_response");
+}
+
+/* static */
+std::string TestServer::GetConnectProxyURL() {
+  return GetFileURL(kConnectProxyPath);
 }
 
 /* static */

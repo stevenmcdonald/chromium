@@ -320,10 +320,18 @@ public class CronetUrlRequestContext extends CronetEngineBase {
                                     // mUrlRequestContextAdapter is guaranteed to exist until
                                     // initialization on init and network threads completes and
                                     // initNetworkThread is called back on network thread.
-                                    CronetUrlRequestContextJni.get()
-                                            .initRequestContextOnInitThread(
-                                                    mUrlRequestContextAdapter,
-                                                    CronetUrlRequestContext.this);
+                                    if (builder.getProxyUrl() != null && builder.getProxyUrl().startsWith("socks5://")) {
+                                        CronetUrlRequestContextJni.get()
+                                            .initRequestContextOnInitThreadWithUri(
+                                                mUrlRequestContextAdapter,
+                                                CronetUrlRequestContext.this,
+                                                builder.getProxyUrl());
+                                        } else {
+                                            CronetUrlRequestContextJni.get()
+                                                .initRequestContextOnInitThread(
+                                                mUrlRequestContextAdapter,
+                                                CronetUrlRequestContext.this);
+                                       }
                                 }
                             }
 
@@ -445,6 +453,10 @@ public class CronetUrlRequestContext extends CronetEngineBase {
 
         if (engineBuilder.experimentalOptions() != null) {
             resultBuilder.setExperimentalOptions(engineBuilder.experimentalOptions());
+        }
+
+        if (engineBuilder.getProxyUrl() != null) {
+            resultBuilder.setProxyUrl(engineBuilder.getProxyUrl());
         }
 
         return resultBuilder.build();
@@ -1097,6 +1109,9 @@ public class CronetUrlRequestContext extends CronetEngineBase {
 
         @NativeClassQualifiedName("CronetContextAdapter")
         void destroy(long nativePtr, CronetUrlRequestContext caller);
+
+        @NativeClassQualifiedName("CronetContextAdapter")
+        void initRequestContextOnInitThreadWithUri(long nativePtr, CronetUrlRequestContext caller, String uri);
 
         @NativeClassQualifiedName("CronetContextAdapter")
         boolean startNetLogToFile(

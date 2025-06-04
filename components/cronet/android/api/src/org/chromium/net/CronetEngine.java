@@ -137,6 +137,16 @@ public abstract class CronetEngine {
         protected final ICronetEngineBuilder mBuilderDelegate;
 
         /**
+         * Sets a proxy URL for the Engine. The proxy will be used for all requests
+         *
+         * @param proxyUrl URL of the proxy to use
+         */
+        public Builder setProxyUrl(String proxyUrl) {
+            mBuilderDelegate.setProxyUrl(proxyUrl);
+            return this;
+        }
+
+        /**
          * Constructs a {@link Builder} object that facilitates creating a {@link CronetEngine}. The
          * default configuration enables HTTP/2 and QUIC, but disables the HTTP cache.
          *

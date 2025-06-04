@@ -512,6 +512,12 @@ struct EngineParams {
   string user_agent;
 
   /**
+   * Use an HTTP(S) or SOCKS proxy. Setting this will use the proxy for all
+   * connections
+   */
+  string proxy_url;
+
+  /**
    * Sets a default value for the Accept-Language header value for UrlRequests
    * created by this engine. Explicitly setting the Accept-Language header
    * value for individual UrlRequests will override this value.
