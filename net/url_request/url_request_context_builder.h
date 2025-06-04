@@ -220,6 +220,11 @@ class NET_EXPORT URLRequestContextBuilder {
   void set_accept_language(const std::string& accept_language);
   void set_user_agent(const std::string& user_agent);
 
+  // Sets a string argument to be passed into MappedHostResolver->
+  // SetRulesFromString. It can be used to create direct mappings
+  // from domains to ips that override dns lookups.
+  void set_resolver_rules(const std::string& envoy_url);
+
   // Makes the created URLRequestContext use a particular HttpUserAgentSettings
   // object. Not compatible with set_accept_language() / set_user_agent().
   //
@@ -479,6 +484,8 @@ class NET_EXPORT URLRequestContextBuilder {
   bool cookie_store_set_by_client_ = false;
   bool suppress_setting_socket_performance_watcher_factory_for_testing_ = false;
   bool stale_dns_enabled_ = false;
+
+  std::string resolver_rules_;
 
   handles::NetworkHandle bound_network_ = handles::kInvalidNetworkHandle;
   // Used only if the context is bound to a network to customize the

@@ -447,6 +447,10 @@ public class CronetUrlRequestContext extends CronetEngineBase {
             resultBuilder.setExperimentalOptions(engineBuilder.experimentalOptions());
         }
 
+        if (engineBuilder.getResolverRules() != null) {
+            resultBuilder.setResolverRules(engineBuilder.getResolverRules());
+        }
+
         return resultBuilder.build();
     }
 

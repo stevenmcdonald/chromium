@@ -75,6 +75,8 @@ public abstract class ICronetEngineBuilder {
 
     public abstract ICronetEngineBuilder setUserAgent(String userAgent);
 
+    public abstract ICronetEngineBuilder setResolverRules(String resolverRules);
+
     public abstract String getDefaultUserAgent();
 
     public abstract ExperimentalCronetEngine build();
