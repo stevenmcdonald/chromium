@@ -240,6 +240,9 @@ class NET_EXPORT URLRequestContext final {
   // context has been bound to.
   handles::NetworkHandle bound_network() const { return bound_network_; }
 
+  void set_resolver_rules(const std::string& resolver_rules) { resolver_rules_ = resolver_rules; }
+  const std::string& resolver_rules() const { return resolver_rules_; }
+
   void AssertCalledOnValidThread() {
     DCHECK_CALLED_ON_VALID_THREAD(thread_checker_);
   }
@@ -392,6 +395,8 @@ class NET_EXPORT URLRequestContext final {
   // Triggers a DCHECK if a NetworkAnonymizationKey/IsolationInfo is not
   // provided to a request when true.
   bool require_network_anonymization_key_ = false;
+
+  std::string resolver_rules_;
 
   std::optional<std::string> cookie_deprecation_label_;
 

@@ -48,6 +48,13 @@ class AndroidHttpEngineBuilderWrapper extends ICronetEngineBuilder {
     }
 
     @Override
+    public ICronetEngineBuilder setResolverRules(String resolverRules) {
+        // HttpEngine.Builder doesn't have this method
+        // mBackend.setResolverRules(resolverRules);
+        return this;
+    }
+
+    @Override
     public ICronetEngineBuilder setStoragePath(String value) {
         mBackend.setStoragePath(value);
         return this;

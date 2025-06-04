@@ -94,6 +94,7 @@ struct Cronet_EngineParams {
   std::vector<Cronet_PublicKeyPins> public_key_pins;
   bool enable_public_key_pinning_bypass_for_local_trust_anchors = true;
   double network_thread_priority = std::numeric_limits<double>::quiet_NaN();
+  std::string resolver_rules;
   std::string experimental_options;
 };
 

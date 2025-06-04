@@ -137,6 +137,7 @@ public abstract class CronetEngineBuilderImpl extends ICronetEngineBuilder {
     private final CronetSource mSource;
     private boolean mPublicKeyPinningBypassForLocalTrustAnchorsEnabled;
     private String mUserAgent;
+    private String mResolverRules;
     private String mStoragePath;
     private boolean mQuicEnabled;
     private boolean mHttp2Enabled;
@@ -224,6 +225,16 @@ public abstract class CronetEngineBuilderImpl extends ICronetEngineBuilder {
     @VisibleForTesting
     String getUserAgent() {
         return mUserAgent;
+    }
+
+    @Override
+    public CronetEngineBuilderImpl setResolverRules(String resolverRules) {
+        mResolverRules = resolverRules;
+        return this;
+    }
+
+    public String getResolverRules() {
+        return mResolverRules;
     }
 
     @Override
