@@ -124,7 +124,6 @@ ProxyConfigService::CreateFixedSystemProxyConfigService(
   raw_proxy_config.proxy_rules().type = ProxyConfig::ProxyRules::Type::PROXY_LIST;
   raw_proxy_config.proxy_rules().single_proxies.SetSingleProxyServer(ProxyUriToProxyServer(uri, ProxyServer::SCHEME_SOCKS5));
 
-  // scm: we should probably use a unique annotation, but I'm failing to make that work
 #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_APPLE) || BUILDFLAG(IS_LINUX)
   ProxyConfigWithAnnotation proxy_config = ProxyConfigWithAnnotation(raw_proxy_config, kFixedProxyConfigTrafficAnnotation);
 #else
