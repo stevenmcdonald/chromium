@@ -37,6 +37,9 @@
 #include "net/nqe/network_quality_estimator_params.h"
 #include "net/quic/set_quic_flag.h"
 #include "net/socket/ssl_client_socket.h"
+#include "net/ssl/ssl_cipher_suite_names.h"
+#include "net/ssl/ssl_config.h"
+#include "net/ssl/ssl_config_service_defaults.h"
 #include "net/ssl/ssl_key_logger_impl.h"
 #include "net/third_party/quiche/src/quiche/quic/core/crypto/crypto_protocol.h"
 #include "net/third_party/quiche/src/quiche/quic/core/quic_packets.h"
@@ -311,6 +314,9 @@ URLRequestContextConfig::URLRequestContextConfig(
     const std::string& storage_path,
     const std::string& accept_language,
     const std::string& user_agent,
+    const std::string& disabled_cipher_suites,
+    const uint16_t min_ssl_version,
+    const uint16_t max_ssl_version,
     base::Value::Dict experimental_options,
     std::unique_ptr<net::CertVerifier> mock_cert_verifier,
     bool enable_network_quality_estimator,
@@ -325,6 +331,9 @@ URLRequestContextConfig::URLRequestContextConfig(
       storage_path(storage_path),
       accept_language(accept_language),
       user_agent(user_agent),
+      disabled_cipher_suites(disabled_cipher_suites),
+      min_ssl_version(min_ssl_version),
+      max_ssl_version(max_ssl_version),
       mock_cert_verifier(std::move(mock_cert_verifier)),
       enable_network_quality_estimator(enable_network_quality_estimator),
       bypass_public_key_pinning_for_local_trust_anchors(
@@ -351,6 +360,9 @@ URLRequestContextConfig::CreateURLRequestContextConfig(
     const std::string& storage_path,
     const std::string& accept_language,
     const std::string& user_agent,
+    const std::string& disabled_cipher_suites,
+    const uint16_t min_ssl_version,
+    const uint16_t max_ssl_version,
     const std::string& unparsed_experimental_options,
     std::unique_ptr<net::CertVerifier> mock_cert_verifier,
     bool enable_network_quality_estimator,
@@ -369,6 +381,7 @@ URLRequestContextConfig::CreateURLRequestContextConfig(
   return base::WrapUnique(new URLRequestContextConfig(
       enable_quic, enable_spdy, enable_brotli, http_cache, http_cache_max_size,
       load_disable_cache, storage_path, accept_language, user_agent,
+      disabled_cipher_suites, min_ssl_version, max_ssl_version,
       std::move(experimental_options).value(), std::move(mock_cert_verifier),
       enable_network_quality_estimator,
       bypass_public_key_pinning_for_local_trust_anchors,
@@ -879,6 +892,35 @@ void URLRequestContextConfig::ConfigureURLRequestContextBuilder(
   }
   context_builder->set_accept_language(accept_language);
   context_builder->set_user_agent(user_agent);
+
+  net::SSLContextConfig ssl_context_config;
+  if (!disabled_cipher_suites.empty()) {
+    auto cipher_strings = base::SplitString(disabled_cipher_suites, ",", base::TRIM_WHITESPACE, base::SPLIT_WANT_ALL);
+    // see net::ParseCipherSuites(cipher_strings);
+    std::vector<uint16_t> cipher_suites;
+    cipher_suites.reserve(cipher_strings.size());
+
+    for (auto it = cipher_strings.begin(); it != cipher_strings.end(); ++it) {
+      uint16_t cipher_suite = 0;
+      if (!net::ParseSSLCipherString(*it, &cipher_suite)) {
+        continue;
+      }
+      cipher_suites.push_back(cipher_suite);
+    }
+    std::sort(cipher_suites.begin(), cipher_suites.end());
+
+    ssl_context_config.disabled_cipher_suites =  cipher_suites;
+  }
+
+  if (min_ssl_version != net::kDefaultSSLVersionMin) {
+    ssl_context_config.version_min = min_ssl_version;
+  }
+  if (max_ssl_version != net::kDefaultSSLVersionMax) {
+    ssl_context_config.version_max = max_ssl_version;
+  }
+  auto ssl_config_service_ptr = std::make_unique<net::SSLConfigServiceDefaults>(ssl_context_config);
+  context_builder->set_ssl_config_service(std::move(ssl_config_service_ptr));
+
   net::HttpNetworkSessionParams session_params;
   session_params.enable_http2 = enable_spdy;
   session_params.enable_quic = enable_quic;
@@ -909,6 +951,7 @@ URLRequestContextConfigBuilder::Build() {
   return URLRequestContextConfig::CreateURLRequestContextConfig(
       enable_quic, enable_spdy, enable_brotli, http_cache, http_cache_max_size,
       load_disable_cache, storage_path, accept_language, user_agent,
+      disabled_cipher_suites, min_ssl_version, max_ssl_version,
       experimental_options, std::move(mock_cert_verifier),
       enable_network_quality_estimator,
       bypass_public_key_pinning_for_local_trust_anchors,
