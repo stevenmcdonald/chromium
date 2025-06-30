@@ -166,6 +166,8 @@ TEST(URLRequestContextConfigTest, TestExperimentalOptionParsing) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           options_json,
           // MockCertVerifier to use for testing purposes.
@@ -354,6 +356,8 @@ TEST(URLRequestContextConfigTest, SetSupportedQuicVersionByAlpn) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           experimental_options,
           // MockCertVerifier to use for testing purposes.
@@ -402,6 +406,8 @@ TEST(URLRequestContextConfigTest, SetUnsupportedQuicVersion) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{\"QUIC\":{\"quic_version\":\"h3-Q047\"}}",
           // MockCertVerifier to use for testing purposes.
@@ -452,6 +458,8 @@ TEST(URLRequestContextConfigTest, SetObsoleteQuicVersion) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           std::string("{\"QUIC\":{\"quic_version\":\"") +
               quic::ParsedQuicVersionToString(
@@ -503,6 +511,8 @@ TEST(URLRequestContextConfigTest, SetQuicServerMigrationOptions) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{\"QUIC\":{\"allow_server_migration\":true}}",
           // MockCertVerifier to use for testing purposes.
@@ -555,6 +565,8 @@ TEST(URLRequestContextConfigTest,
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{\"QUIC\":{\"goaway_sessions_on_ip_change\":true}}",
           // MockCertVerifier to use for testing purposes.
@@ -604,6 +616,8 @@ TEST(URLRequestContextConfigTest, SetQuicConnectionMigrationV2Options) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{\"QUIC\":{\"migrate_sessions_on_network_change_v2\":true,"
           "\"migrate_sessions_early_v2\":true,"
@@ -672,6 +686,8 @@ TEST(URLRequestContextConfigTest, SetQuicAllowPortMigration) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{\"QUIC\":{\"allow_port_migration\":false}}",
           // MockCertVerifier to use for testing purposes.
@@ -719,6 +735,8 @@ TEST(URLRequestContextConfigTest, DisableQuicRetryWithoutAltSvcOnQuicErrors) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{\"QUIC\":{\"retry_without_alt_svc_on_quic_errors\":false}}",
           // MockCertVerifier to use for testing purposes.
@@ -766,6 +784,8 @@ TEST(URLRequestContextConfigTest, BrokenAlternativeServiceDelayParams1) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{\"QUIC\":{\"initial_delay_for_broken_alternative_service_seconds\":"
           "1,"
@@ -820,6 +840,8 @@ TEST(URLRequestContextConfigTest, BrokenAlternativeServiceDelayParams2) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{\"QUIC\":{\"initial_delay_for_broken_alternative_service_seconds\":"
           "5,"
@@ -874,6 +896,8 @@ TEST(URLRequestContextConfigTest, DelayMainJobWithAvailableSpdySession) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{\"QUIC\":{\"delay_main_job_with_available_spdy_session\":true}}",
           // MockCertVerifier to use for testing purposes.
@@ -921,6 +945,8 @@ TEST(URLRequestContextConfigTest, SetDisableTlsZeroRtt) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{\"QUIC\":{\"disable_tls_zero_rtt\":true}}",
           // MockCertVerifier to use for testing purposes.
@@ -969,6 +995,8 @@ TEST(URLRequestContextConfigTest, SetQuicHostWhitelist) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{\"QUIC\":{\"host_whitelist\":\"www.example.com,www.example.org\"}}",
           // MockCertVerifier to use for testing purposes.
@@ -1019,6 +1047,8 @@ TEST(URLRequestContextConfigTest, SetQuicMaxTimeBeforeCryptoHandshake) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{\"QUIC\":{\"max_time_before_crypto_handshake_seconds\":7,"
           "\"max_idle_time_before_crypto_handshake_seconds\":11}}",
@@ -1069,6 +1099,8 @@ TEST(URLURLRequestContextConfigTest, SetQuicConnectionOptions) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{\"QUIC\":{\"connection_options\":\"TIME,TBBR,REJ\","
           "\"client_connection_options\":\"TBBR,1RTT\"}}",
@@ -1127,6 +1159,8 @@ TEST(URLURLRequestContextConfigTest, SetAcceptLanguageAndUserAgent) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{}",
           // MockCertVerifier to use for testing purposes.
@@ -1175,6 +1209,8 @@ TEST(URLURLRequestContextConfigTest, TurningOffQuic) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{}",
           // MockCertVerifier to use for testing purposes.
@@ -1241,6 +1277,8 @@ TEST(URLRequestContextConfigTest, SetSpdyGoAwayOnIPChange) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{\"spdy_go_away_on_ip_change\":false}",
           // MockCertVerifier to use for testing purposes.
@@ -1289,6 +1327,8 @@ TEST(URLRequestContextConfigTest, WrongSpdyGoAwayOnIPChangeValue) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{\"spdy_go_away_on_ip_change\":\"not a bool\"}",
           // MockCertVerifier to use for testing purposes.
@@ -1331,6 +1371,8 @@ TEST(URLRequestContextConfigTest, BidiStreamDetectBrokenConnection) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{\"bidi_stream_detect_broken_connection\":10}",
           // MockCertVerifier to use for testing purposes.
@@ -1375,6 +1417,8 @@ TEST(URLRequestContextConfigTest, WrongBidiStreamDetectBrokenConnectionValue) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{\"bidi_stream_detect_broken_connection\": \"not an int\"}",
           // MockCertVerifier to use for testing purposes.
@@ -1417,6 +1461,8 @@ TEST(URLRequestContextConfigTest, HttpsSvcbOptions) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{\"UseDnsHttpsSvcb\":{\"enable\":true,"
           "\"insecure_extra_time_max\":\"1ms\","

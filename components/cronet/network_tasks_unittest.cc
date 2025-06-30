@@ -83,6 +83,8 @@ std::unique_ptr<URLRequestContextConfig> CreateSimpleURLRequestContextConfig() {
       "foreign-language",
       // User-Agent request header field.
       "fake agent",
+      // Resolver rules.
+      "fake resolver rules",
       // JSON encoded experimental options.
       "",
       // MockCertVerifier to use for testing purposes.

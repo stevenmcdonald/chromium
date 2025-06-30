@@ -690,6 +690,8 @@ TEST_F(StaleHostResolverTest, CreatedByContext) {
           "foreign-language",
           // User-Agent request header field.
           "fake agent",
+          // Resolver rules.
+          "fake resolver rules",
           // JSON encoded experimental options.
           "{\"AsyncDNS\":{\"enable\":false},"
           "\"StaleDNS\":{\"enable\":true,"
