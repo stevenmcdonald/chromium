@@ -168,6 +168,12 @@ const char kDisableTlsZeroRtt[] = "disable_tls_zero_rtt";
 // underlying OS.
 const char kSpdyGoAwayOnIpChange[] = "spdy_go_away_on_ip_change";
 
+// TLS options
+const char kSslConfig[] = "ssl_config";
+//const char kDisabledCipherSuites[] = "disabled_cipher_suites";
+//const char kMinSslVersion[] = "min_ssl_version";
+//const char kMaxSslVersion[] = "max_ssl_version";
+
 // Whether the connection status of all bidirectional streams (created through
 // the Cronet engine) should be monitored.
 // The value must be an integer (> 0) and will be interpreted as a suggestion
@@ -405,8 +411,13 @@ void URLRequestContextConfig::SetContextBuilderExperimentalOptions(
   StaleHostResolver::StaleOptions stale_dns_options;
   const std::string* host_resolver_rules_string;
 
+// START (EXPERIMENTAL OPTIONS)
+
   for (auto iter = experimental_options.begin();
        iter != experimental_options.end(); ++iter) {
+
+    std::cout << "FOUND OPTION: " << iter->first << "\n";
+
     if (iter->first == kQuicFieldTrialName) {
       if (!iter->second.is_dict()) {
         LOG(ERROR) << "Quic config params \"" << iter->second
@@ -725,6 +736,85 @@ void URLRequestContextConfig::SetContextBuilderExperimentalOptions(
         continue;
       }
       session_params->spdy_go_away_on_ip_change = iter->second.GetBool();
+    } else if (iter->first == kSslConfig) {
+
+// START (NEW)
+
+      if (!iter->second.is_dict()) {
+        LOG(ERROR) << "\"" << iter->first << "\" config params \""
+                   << iter->second << "\" is not a dict value";
+        effective_experimental_options.Remove(iter->first);
+        std::cout << "NO DICT\n";
+        continue;
+      } else {
+        std::cout << "GOT DICT\n";
+      }
+
+      // decode ssl config
+      // there's a fromDict(), but dict types may not be compatible?
+      //std::string temp;
+      //base::JSONWriter::Write(iter->second.GetDict(), &temp);
+      //net::SSLContextConfig ssl_context_config = net::SSLContextConfig.FromString(temp); 
+      //auto ssl_config_service_ptr = std::make_unique<net::SSLConfigServiceDefaults>(ssl_context_config);
+      //context_builder->set_ssl_config_service(std::move(ssl_config_service_ptr));
+
+      // part of dict is delimited string, need to transfer values manually?
+      const base::Value::Dict& ssl_config = iter->second.GetDict();
+      const std::string* dict_disabled_cipher_suites = ssl_config.FindString("disabled_cipher_suites");
+      std::optional<int> dict_min_ssl_version = ssl_config.FindInt("min_ssl_version");
+      std::optional<int> dict_max_ssl_version = ssl_config.FindInt("max_ssl_version");
+
+      net::SSLContextConfig ssl_context_config;
+      std::string temp_disabled_cipher_suites = *dict_disabled_cipher_suites;
+      if (!temp_disabled_cipher_suites.empty()) {
+        std::cout << "GOT CIPER SUITES\n";
+        auto cipher_strings = base::SplitString(temp_disabled_cipher_suites, ",", base::TRIM_WHITESPACE, base::SPLIT_WANT_ALL);
+        // see net::ParseCipherSuites(cipher_strings);
+        std::vector<uint16_t> cipher_suites;
+        cipher_suites.reserve(cipher_strings.size());
+
+        for (auto it = cipher_strings.begin(); it != cipher_strings.end(); ++it) {
+          uint16_t cipher_suite = 0;
+          if (!net::ParseSSLCipherString(*it, &cipher_suite)) {
+            continue;
+          }
+          cipher_suites.push_back(cipher_suite);
+        }
+        std::sort(cipher_suites.begin(), cipher_suites.end());
+
+        ssl_context_config.disabled_cipher_suites =  cipher_suites;
+      } else {
+        std::cout << "NO CIPER SUITES\n";
+      }
+
+      if (dict_min_ssl_version.has_value()) {
+        std::cout << "GOT MIN SSL\n";
+        int temp_min_ssl_version = dict_min_ssl_version.value();
+        if (temp_min_ssl_version >= 0 && temp_min_ssl_version <= UINT16_MAX) {
+          std::cout << "VALID MIN SSL\n";
+          ssl_context_config.version_min = static_cast<uint16_t>(temp_min_ssl_version);
+        } else {
+          std::cout << "INVALID MIN SSL\n";
+        }
+      } else {
+        std::cout << "NO MIN SSL\n";
+      }
+      if (dict_max_ssl_version.has_value()) {
+        std::cout << "GOT MAX SSL\n";
+        int temp_max_ssl_version = dict_max_ssl_version.value();
+        if (temp_max_ssl_version >= 0 && temp_max_ssl_version <= UINT16_MAX) {
+        std::cout << "VALID MAX SSL\n";
+          ssl_context_config.version_max = static_cast<uint16_t>(temp_max_ssl_version);
+        } else {
+        std::cout << "INVALID MAX SSL\n";
+        }
+      } else {
+        std::cout << "NO MAX SSL\n";
+      }
+
+      auto ssl_config_service_ptr = std::make_unique<net::SSLConfigServiceDefaults>(ssl_context_config);
+      context_builder->set_ssl_config_service(std::move(ssl_config_service_ptr));
+
     } else {
       LOG(WARNING) << "Unrecognized Cronet experimental option \""
                    << iter->first << "\" with params \"" << iter->second;
@@ -814,6 +904,8 @@ void URLRequestContextConfig::ConfigureURLRequestContextBuilder(
   context_builder->set_accept_language(accept_language);
   context_builder->set_user_agent(user_agent);
 
+// START (OLD)
+/*
   net::SSLContextConfig ssl_context_config;
 
   if (!disabled_cipher_suites.empty()) {
@@ -855,6 +947,9 @@ void URLRequestContextConfig::ConfigureURLRequestContextBuilder(
 
   auto ssl_config_service_ptr = std::make_unique<net::SSLConfigServiceDefaults>(ssl_context_config);
   context_builder->set_ssl_config_service(std::move(ssl_config_service_ptr));
+
+*/
+// END (OLD)
 
   net::HttpNetworkSessionParams session_params;
   session_params.enable_http2 = enable_spdy;

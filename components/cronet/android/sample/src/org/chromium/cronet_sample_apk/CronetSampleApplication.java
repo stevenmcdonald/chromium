@@ -24,9 +24,11 @@ public class CronetSampleApplication extends Application {
         myBuilder
                 .enableHttpCache(CronetEngine.Builder.HTTP_CACHE_IN_MEMORY, 100 * 1024)
                 .enableHttp2(true)
-                .setDisabledCipherSuites("0xc024,0xc02f,0002")
-                .setMinSslVersion((short)771) // net::SSL_PROTOCOL_VERSION_TLS1_2 -> hex value 0x0303
-                .setMaxSslVersion((short)772) // net::SSL_PROTOCOL_VERSION_TLS1_3 -> hex value 0x0304
+                //.setDisabledCipherSuites("0xc024,0xc02f,0002")
+                //.setMinSslVersion((short)771) // net::SSL_PROTOCOL_VERSION_TLS1_2 -> hex value 0x0303
+                //.setMaxSslVersion((short)772) // net::SSL_PROTOCOL_VERSION_TLS1_3 -> hex value 0x0304
+                // net::SSL_PROTOCOL_VERSION_TLS1_2/3 -> hex value 0x0303/4
+                .setExperimentalOptions("{\"ssl_config\": {\"disabled_cipher_suites\": \"0xc024,0xc02f,0002\",\"min_ssl_version\": 771,\"max_ssl_version\": 772}}");
                 .enableQuic(true);
         mCronetEngine = myBuilder.build();
     }

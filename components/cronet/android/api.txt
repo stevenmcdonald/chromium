@@ -86,13 +86,13 @@ public class org.chromium.net.CronetEngine$Builder {
   public static final int HTTP_CACHE_IN_MEMORY;
   public static final int HTTP_CACHE_DISK_NO_HTTP;
   public static final int HTTP_CACHE_DISK;
+  public org.chromium.net.CronetEngine$Builder setDisabledCipherSuites(java.lang.String);
+  public org.chromium.net.CronetEngine$Builder setMinSslVersion(java.lang.Short);
+  public org.chromium.net.CronetEngine$Builder setMaxSslVersion(java.lang.Short);
   public org.chromium.net.CronetEngine$Builder(android.content.Context);
   public org.chromium.net.CronetEngine$Builder(org.chromium.net.ICronetEngineBuilder);
   public java.lang.String getDefaultUserAgent();
   public org.chromium.net.CronetEngine$Builder setUserAgent(java.lang.String);
-  public org.chromium.net.CronetEngine$Builder setDisabledCipherSuites(java.lang.String);
-  public org.chromium.net.CronetEngine$Builder setMinSslVersion(java.lang.Short);
-  public org.chromium.net.CronetEngine$Builder setMaxSslVersion(java.lang.Short);
   public org.chromium.net.CronetEngine$Builder setStoragePath(java.lang.String);
   public org.chromium.net.CronetEngine$Builder setLibraryLoader(org.chromium.net.CronetEngine$Builder$LibraryLoader);
   public org.chromium.net.CronetEngine$Builder enableQuic(boolean);
@@ -641,4 +641,4 @@ public class org.chromium.net.apihelpers.UrlRequestCallbacks {
   public static org.chromium.net.apihelpers.JsonCronetCallback forJsonBody(org.chromium.net.apihelpers.RedirectHandler, org.chromium.net.apihelpers.CronetRequestCompletionListener<org.json.JSONObject>);
   public static org.chromium.net.apihelpers.UrlRequestCallbacks$CallbackAndResponseFuturePair<org.json.JSONObject, org.chromium.net.apihelpers.JsonCronetCallback> forJsonBody(org.chromium.net.apihelpers.RedirectHandler);
 }
-Stamp: 31ef5e660d31d43015f23b6d5d5d2ce0
+Stamp: c11bf584850391d2d22b0f9c36cea18b
