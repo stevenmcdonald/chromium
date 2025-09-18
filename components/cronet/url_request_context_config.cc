@@ -165,6 +165,9 @@ const char kDisableTlsZeroRtt[] = "disable_tls_zero_rtt";
 // underlying OS.
 const char kSpdyGoAwayOnIpChange[] = "spdy_go_away_on_ip_change";
 
+// DNS options
+const char kResolverRules[] = "resolver_rules";
+
 // Whether the connection status of all bidirectional streams (created through
 // the Cronet engine) should be monitored.
 // The value must be an integer (> 0) and will be interpreted as a suggestion
@@ -397,6 +400,9 @@ void URLRequestContextConfig::SetContextBuilderExperimentalOptions(
 
   for (auto iter = experimental_options.begin();
        iter != experimental_options.end(); ++iter) {
+
+    std::cout << "FOUND OPTION: " << iter->first << "\n";
+
     if (iter->first == kQuicFieldTrialName) {
       if (!iter->second.is_dict()) {
         LOG(ERROR) << "Quic config params \"" << iter->second
@@ -715,6 +721,21 @@ void URLRequestContextConfig::SetContextBuilderExperimentalOptions(
         continue;
       }
       session_params->spdy_go_away_on_ip_change = iter->second.GetBool();
+    } else if (iter->first == kResolverRules) {
+      if (!iter->second.is_string()) {
+        LOG(ERROR) << "\"" << iter->first << "\" config params \""
+                   << iter->second << "\" is not a bool";
+        effective_experimental_options.Remove(iter->first);
+        std::cout << "NO STRING\n";
+        continue;
+      } else {
+        std::cout << "GOT STRING\n";
+      }
+
+      std::string temp_resolver_rules = iter->second.GetString();
+
+      std::cout << "STRING: " << temp_resolver_rules << "\n";
+      context_builder->set_resolver_rules(temp_resolver_rules);
     } else {
       LOG(WARNING) << "Unrecognized Cronet experimental option \""
                    << iter->first << "\" with params \"" << iter->second;
@@ -803,7 +824,7 @@ void URLRequestContextConfig::ConfigureURLRequestContextBuilder(
   }
   context_builder->set_accept_language(accept_language);
   context_builder->set_user_agent(user_agent);
-  context_builder->set_resolver_rules(resolver_rules);
+  //context_builder->set_resolver_rules(resolver_rules);
   net::HttpNetworkSessionParams session_params;
   session_params.enable_http2 = enable_spdy;
   session_params.enable_quic = enable_quic;

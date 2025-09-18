@@ -12,7 +12,8 @@ Cronet_EnginePtr CreateCronetEngine() {
   Cronet_EnginePtr cronet_engine = Cronet_Engine_Create();
   Cronet_EngineParamsPtr engine_params = Cronet_EngineParams_Create();
   Cronet_EngineParams_user_agent_set(engine_params, "CronetSample/1");
-  Cronet_EngineParams_resolver_rules_set(engine_params, "MAP * 208.80.154.224");
+  //Cronet_EngineParams_resolver_rules_set(engine_params, "MAP * 208.80.154.224");
+  Cronet_EngineParams_experimental_options_set(engine_params, "{\"resolver_rules\": \"MAP * 65.21.79.229, EXCLUDE *.google.*\"}");
   Cronet_EngineParams_enable_quic_set(engine_params, true);
 
   Cronet_Engine_StartWithParams(cronet_engine, engine_params);

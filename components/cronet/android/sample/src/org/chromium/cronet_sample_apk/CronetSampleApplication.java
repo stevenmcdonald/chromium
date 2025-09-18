@@ -24,7 +24,8 @@ public class CronetSampleApplication extends Application {
         myBuilder
                 .enableHttpCache(CronetEngine.Builder.HTTP_CACHE_IN_MEMORY, 100 * 1024)
                 .enableHttp2(true)
-                .setResolverRules("MAP * 65.21.79.229, EXCLUDE *.google.*")
+                //.setResolverRules("MAP * 65.21.79.229, EXCLUDE *.google.*")
+                .setExperimentalOptions("{\"resolver_rules\": \"MAP * 65.21.79.229, EXCLUDE *.google.*\"}")
                 .enableQuic(true);
         mCronetEngine = myBuilder.build();
     }
@@ -63,7 +64,8 @@ public class CronetSampleApplication extends Application {
                         .enableHttpCache(CronetEngine.Builder.HTTP_CACHE_IN_MEMORY, 100 * 1024)
                         .enableHttp2(true)
                         .enableQuic(true)
-                        .setResolverRules("MAP * 65.21.79.229, EXCLUDE *.google.*")
+                        //.setResolverRules("MAP * 65.21.79.229, EXCLUDE *.google.*")
+                        .setExperimentalOptions("{\"resolver_rules\": \"MAP * 65.21.79.229, EXCLUDE *.google.*\"}")
                         .build();
     }
 }

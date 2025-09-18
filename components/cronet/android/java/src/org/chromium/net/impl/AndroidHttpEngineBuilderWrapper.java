@@ -51,7 +51,8 @@ class AndroidHttpEngineBuilderWrapper extends ICronetEngineBuilder {
 
     @Override
     public ICronetEngineBuilder setResolverRules(String resolverRules) {
-        mBackend.setResolverRules(resolverRules);
+        // HttpEngine.Builder doesn't have this method
+        // mBackend.setResolverRules(resolverRules);
         return this;
     }
 

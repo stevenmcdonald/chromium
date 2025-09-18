@@ -186,6 +186,11 @@ public class ExperimentalOptionsTranslationTestUtil {
         }
 
         @Override
+        public ICronetEngineBuilder setResolverRules(String resolverRules) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public String getDefaultUserAgent() {
             throw new UnsupportedOperationException();
         }
